@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="flex justify-center items-center min-h-screen">
+
+<div class="card w-96 bg-base-100 shadow-xl">
+
+<div class="card-body">
+
+<h2 class="text-center text-2xl font-bold">
+Connexion NETSUP
+</h2>
+
+<form method="POST">
+
+{% csrf_token %}
+
+<div class="form-control">
+
+<label class="label">
+Téléphone
+</label>
+
+<input
+type="text"
+name="telephone"
+class="input input-bordered w-full"
+required
+>
+
+</div>
+
+<div class="form-control mt-4">
+
+<label class="label">
+Mot de passe
+</label>
+
+<input
+type="password"
+name="password"
+class="input input-bordered w-full"
+required
+>
+
+</div>
+
+<button class="btn btn-primary w-full mt-6">
+Se connecter
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

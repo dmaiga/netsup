@@ -1,0 +1,155 @@
+{% extends "base_sup.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'superviseur_sites' %}" class="btn btn-ghost btn-sm gap-2 px-0">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Retour aux sites
+    </a>
+</div>
+
+<header class="mb-6">
+    <h1 class="text-2xl font-extrabold text-slate-800 leading-tight">
+        Contrôle : <span class="text-primary">{{ site.nom }}</span>
+    </h1>
+    <p class="text-sm text-slate-500 flex items-center gap-1">
+        <i data-lucide="map-pin" class="w-3 h-3"></i> {{ site.adresse }}
+    </p>
+</header>
+
+<form method="POST" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+    <input type="hidden" name="gps_lat" id="gps_lat">
+    <input type="hidden" name="gps_long" id="gps_long">
+
+    <div class="card bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-100">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i data-lucide="users" class="w-4 h-4 text-primary"></i>
+                Présence Techniciens
+            </h3>
+        </div>
+        <div class="p-5 space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text font-bold text-slate-400 text-xs uppercase">Prévus</span>
+                    </label>
+                    <input type="number" value="{{ site.nombre_techniciens_prevus }}" 
+                           class="input input-bordered w-full bg-slate-100 font-bold text-center" readonly>
+                </div>
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text font-bold text-primary text-xs uppercase">Présents</span>
+                    </label>
+                    {{ form.techniciens_presents }}
+                </div>
+            </div>
+            {% if form.techniciens_presents.errors %}
+                <p class="text-error text-xs">{{ form.techniciens_presents.errors.0 }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-100">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-warning"></i>
+                État du Site
+            </h3>
+        </div>
+        <div class="p-5 space-y-4">
+            <div class="form-control">
+                <label class="label pb-1">
+                    <span class="label-text font-bold text-slate-400 text-xs uppercase">Qualité du nettoyage</span>
+                </label>
+                {{ form.etat_proprete }}
+            </div>
+
+            <div class="flex items-center justify-between p-3 bg-red-50 rounded-xl border border-red-100">
+                <div class="flex flex-col">
+                    <span class="font-bold text-red-700">Incident</span>
+                    <span class="text-[10px] text-red-500 uppercase font-bold leading-none">Signaler une anomalie</span>
+                </div>
+                {{ form.incident }}
+            </div>
+
+            <div id="probleme-box" class="form-control hidden animate-in slide-in-from-top duration-300">
+                <label class="label pb-1">
+                    <span class="label-text font-bold text-error text-xs uppercase">Description de l'incident</span>
+                </label>
+                {{ form.problemes }}
+                {% if form.problemes.errors %}
+                    <p class="text-error text-xs mt-1">{{ form.problemes.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="form-control">
+                <label class="label pb-1">
+                    <span class="label-text font-bold text-slate-400 text-xs uppercase">Observations libres</span>
+                </label>
+                {{ form.observations }}
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-100">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i data-lucide="camera" class="w-4 h-4 text-secondary"></i>
+                Preuves Photos
+            </h3>
+        </div>
+        <div class="p-5 space-y-4">
+            <div class="form-control">
+                <label class="label pb-1">
+                    <span class="label-text font-bold text-slate-400 text-xs uppercase">Photo du site</span>
+                </label>
+                {{ form.photo_site }}
+            </div>
+            <div class="form-control">
+                <label class="label pb-1">
+                    <span class="label-text font-bold text-slate-400 text-xs uppercase">Feuille de présence</span>
+                </label>
+                {{ form.photo_presence }}
+            </div>
+        </div>
+    </div>
+
+    <div class="pt-4 pb-12">
+        <button type="submit" class="btn btn-primary btn-lg w-full rounded-2xl shadow-lg shadow-primary/20 gap-3">
+            <i data-lucide="save" class="w-5 h-5"></i>
+            Enregistrer le contrôle
+        </button>
+    </div>
+</form>
+
+<script>
+    // Géolocalisation avec gestion d'erreur simple
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(function(position){
+            document.getElementById("gps_lat").value = position.coords.latitude;
+            document.getElementById("gps_long").value = position.coords.longitude;
+        }, function(error) {
+            console.warn("Erreur GPS : ", error.message);
+        });
+    }
+
+    // Gestion de l'affichage dynamique de l'incident
+    const incidentCheckbox = document.querySelector(".toggle-error");
+    const problemeBox = document.querySelector("#probleme-box");
+
+    function toggleProbleme() {
+        if(incidentCheckbox.checked){
+            problemeBox.classList.remove("hidden");
+            problemeBox.classList.add("block");
+        } else {
+            problemeBox.classList.add("hidden");
+            problemeBox.classList.remove("block");
+        }
+    }
+
+    incidentCheckbox.addEventListener("change", toggleProbleme);
+    toggleProbleme();
+</script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card bg-base-100 shadow-xl max-w-lg mx-auto">
+
+<div class="card-body">
+
+<h2 class="card-title">
+Profil utilisateur
+</h2>
+
+{% if user.photo %}
+<img src="{{ user.photo.url }}" class="w-32 rounded mb-4">
+{% endif %}
+
+<p>
+<strong>Nom :</strong> {{ user.username }}
+</p>
+
+<p>
+<strong>Téléphone :</strong> {{ user.telephone }}
+</p>
+
+<p>
+<strong>Rôle :</strong> {{ user.role }}
+</p>
+
+<p>
+
+<strong>Status :</strong>
+
+{% if user.is_active %}
+<span class="badge badge-success">Actif</span>
+{% else %}
+<span class="badge badge-error">Inactif</span>
+{% endif %}
+
+</p>
+
+</div>
+
+</div>
+
+{% endblock %}

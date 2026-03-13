@@ -1,0 +1,25 @@
+<h1 class="text-xl font-bold mb-4">
+Scanner le QR code
+</h1>
+
+<div id="reader"></div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+
+function onScanSuccess(decodedText) {
+
+    window.location.href = decodedText
+
+}
+
+const html5QrCode = new Html5Qrcode("reader")
+
+html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    onScanSuccess
+)
+
+</script>

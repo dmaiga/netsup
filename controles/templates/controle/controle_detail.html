@@ -1,0 +1,95 @@
+{% extends "base_sup.html" %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <a href="{% url 'controle_list' %}" class="btn btn-ghost btn-sm gap-2 px-0 text-slate-500">
+        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        Retour à l'historique
+    </a>
+    <button onclick="window.print()" class="btn btn-outline btn-sm gap-2 rounded-xl border-slate-200">
+        <i data-lucide="download" class="w-4 h-4"></i>
+        PDF
+    </button>
+</div>
+
+<div class="mb-8">
+    <div class="flex justify-between items-start mb-2">
+        <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">{{ controle.site.nom }}</h1>
+        <div class="badge badge-lg font-bold 
+            {% if controle.etat_proprete == 'Mauvais' %} bg-error/10 text-error border-error/20
+            {% elif controle.etat_proprete == 'Moyen' %} bg-warning/10 text-warning border-warning/20
+            {% else %} bg-success/10 text-success border-success/20 {% endif %}">
+            {{ controle.etat_proprete|upper }}
+        </div>
+    </div>
+    <div class="flex flex-wrap gap-4 text-sm text-slate-500">
+        <span class="flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            {{ controle.date|date:"d F Y" }}
+        </span>
+        <span class="flex items-center gap-1.5">
+            <i data-lucide="clock" class="w-4 h-4"></i>
+            {{ controle.date|date:"H:i" }}
+        </span>
+    </div>
+</div>
+
+<div class="grid grid-cols-3 gap-3 mb-8">
+    <div class="bg-white border border-slate-100 p-3 rounded-2xl text-center shadow-sm">
+        <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Prévus</span>
+        <span class="text-xl font-black text-slate-700">{{ controle.techniciens_prevus }}</span>
+    </div>
+    <div class="bg-white border border-slate-100 p-3 rounded-2xl text-center shadow-sm border-b-success border-b-2">
+        <span class="text-[10px] uppercase font-bold text-success block mb-1">Présents</span>
+        <span class="text-xl font-black text-success">{{ controle.techniciens_presents }}</span>
+    </div>
+    <div class="bg-white border border-slate-100 p-3 rounded-2xl text-center shadow-sm border-b-error border-b-2">
+        <span class="text-[10px] uppercase font-bold text-error block mb-1">Absents</span>
+        <span class="text-xl font-black text-error">{{ controle.techniciens_absents }}</span>
+    </div>
+</div>
+
+<div class="space-y-6 mb-8">
+    {% if controle.incident or controle.problemes %}
+    <div class="p-4 bg-error/5 border border-error/10 rounded-2xl">
+        <h3 class="text-sm font-bold text-error uppercase flex items-center gap-2 mb-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Problèmes signalés
+        </h3>
+        <p class="text-slate-700 leading-relaxed">{{ controle.problemes|default:"L'incident n'a pas été détaillé." }}</p>
+    </div>
+    {% endif %}
+
+    <div class="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Observations du superviseur</h3>
+        <p class="text-slate-700 italic leading-relaxed">
+            {% if controle.observations %}
+                "{{ controle.observations }}"
+            {% else %}
+                <span class="text-slate-300">Aucune observation particulière.</span>
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
+    {% if controle.photo_site %}
+    <div class="space-y-2">
+        <span class="text-xs font-bold text-slate-400 uppercase ml-2 italic">Photo du site</span>
+        <div class="aspect-video bg-slate-200 rounded-3xl overflow-hidden border-4 border-white shadow-md">
+            <img src="{{ controle.photo_site.url }}" class="w-full h-full object-cover cursor-zoom-in" onclick="window.open(this.src)">
+        </div>
+    </div>
+    {% endif %}
+
+    {% if controle.photo_presence %}
+    <div class="space-y-2">
+        <span class="text-xs font-bold text-slate-400 uppercase ml-2 italic">Feuille de présence</span>
+        <div class="aspect-video bg-slate-200 rounded-3xl overflow-hidden border-4 border-white shadow-md">
+            <img src="{{ controle.photo_presence.url }}" class="w-full h-full object-cover cursor-zoom-in" onclick="window.open(this.src)">
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+
+<meta charset="UTF-8">
+<title>NETSUP</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet"/>
+
+</head>
+
+<body class="bg-base-200">
+
+<!-- NAVBAR -->
+
+<div class="navbar bg-base-100 shadow">
+
+<div class="flex-1">
+<a class="btn btn-ghost text-xl">NETSUP</a>
+</div>
+
+<div class="flex-none">
+
+{% if user.is_authenticated %}
+
+<div class="dropdown dropdown-end">
+
+<label tabindex="0" class="btn btn-ghost">
+
+{{ user.username }}
+
+</label>
+
+<ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+
+<li>
+<a href="{% url 'user_list' %}">
+Utilisateurs
+</a>
+</li>
+
+<li>
+<a href="{% url 'logout' %}">
+Logout
+</a>
+</li>
+
+</ul>
+
+</div>
+
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="container mx-auto p-6">
+
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-error mb-4">
+{{ message }}
+</div>
+{% endfor %}
+{% endif %}
+
+{% block content %}
+
+{% endblock %}
+
+</div>
+
+</body>
+</html>
