@@ -1,0 +1,87 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-black text-slate-800">Gestion du Personnel</h1>
+    <div class="flex gap-2">
+        <a href="{% url 'user_create' %}" class="btn btn-sm btn-outline">+ Accès Superviseur</a>
+        <a href="{% url 'technicien_create_global' %}" class="btn btn-sm btn-primary bg-brandBlue border-none text-white">+ Agent Terrain</a>
+    </div>
+</div>
+
+<div class="mb-10">
+    <h2 class="text-xs font-black text-slate-400 uppercase mb-4 tracking-widest flex items-center gap-2">
+        <i data-lucide="shield-check" class="w-4 h-4"></i> Équipe d'encadrement (Superviseurs)
+    </h2>
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <table class="table w-full">
+            <thead>
+                <tr class="bg-slate-50 text-[10px] text-slate-400 uppercase">
+                    <th class="p-4">Nom</th>
+                    <th>Identifiant</th>
+                    <th class="text-right p-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr class="border-b border-slate-50 hover:bg-slate-50/50">
+                    <td class="p-4 font-bold text-slate-700 uppercase">{{ u.first_name }} {{ u.last_name }}</td>
+                    <td class="text-xs text-slate-400">{{ u.username }}</td>
+                    <td class="text-right p-4 space-x-2">
+                        <a href="{% url 'user_detail' u.pk %}" class="btn btn-ghost btn-xs text-slate-400" title="Voir profil"><i data-lucide="eye" class="w-4 h-4"></i></a>
+                        <a href="{% url 'user_update' u.pk %}" class="btn btn-ghost btn-xs text-brandBlue" title="Modifier"><i data-lucide="edit-3" class="w-4 h-4"></i></a>
+                        <a href="{% url 'user_soft_delete' u.pk %}" onclick="return confirm('Désactiver cet accès ?')" class="btn btn-ghost btn-xs text-brandRed" title="Désactiver"><i data-lucide="user-x" class="w-4 h-4"></i></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div>
+    <h2 class="text-xs font-black text-slate-400 uppercase mb-4 tracking-widest flex items-center gap-2">
+        <i data-lucide="users" class="w-4 h-4"></i> Agents de terrain (Techniciens)
+    </h2>
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <table class="table w-full">
+            <thead>
+                <tr class="bg-slate-50 text-[10px] text-slate-400 uppercase">
+                    <th class="p-4">Nom</th>
+                    <th>Contrat</th>
+                    <th>Site Affecté</th>
+                    <th class="text-right p-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in techs %}
+                <tr class="border-b border-slate-50 hover:bg-slate-50/50">
+                    <td class="p-4 font-bold text-slate-700 uppercase">{{ t.prenom }} {{ t.nom }}</td>
+                    <td><span class="badge badge-ghost text-[9px] font-bold">{{ t.get_type_contrat_display }}</span></td>
+                    <td class="text-xs font-bold text-brandBlue">{{ t.site.nom|default:"DISPONIBLE" }}</td>
+                    <td class="text-right p-4 space-x-2">
+                        <a href="{% url 'technicien_detail' t.pk %}" class="btn btn-ghost btn-xs text-slate-400"><i data-lucide="eye" class="w-4 h-4"></i></a>
+                        <a href="{% url 'technicien_update' t.pk %}" class="btn btn-ghost btn-xs text-brandBlue" title="Modifier"><i data-lucide="edit-3" class="w-4 h-4"></i></a>
+                        <a href="{% url 'technicien_soft_delete' t.pk %}" onclick="return confirm('Retirer ce technicien ?')" class="btn btn-ghost btn-xs text-brandRed" title="Supprimer"><i data-lucide="trash-2" class="w-4 h-4"></i></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% if techs.has_other_pages %}
+        <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-center">
+            <div class="join">
+                {% if techs.has_previous %}
+                    <a href="?page_techs={{ techs.previous_page_number }}&q={{ query }}" class="join-item btn btn-xs bg-white">«</a>
+                {% endif %}
+                <button class="join-item btn btn-xs bg-white font-bold">Page {{ techs.number }}</button>
+                {% if techs.has_next %}
+                    <a href="?page_techs={{ techs.next_page_number }}&q={{ query }}" class="join-item btn btn-xs bg-white">»</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

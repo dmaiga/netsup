@@ -1,3 +1,4 @@
+#controles/models
 from django.db import models
 from django.conf import settings
 from sites.models import Site
@@ -29,7 +30,10 @@ class ControleSite(models.Model):
     
     incident = models.BooleanField(default=False)
     problemes = models.TextField(blank=True)
-
+    
+    incident_resolu = models.BooleanField(default=False)
+    date_resolution = models.DateTimeField(null=True, blank=True)
+    
     observations = models.TextField(blank=True)
 
     photo_site = models.ImageField(upload_to='sites/', blank=True, null=True)

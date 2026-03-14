@@ -1,0 +1,90 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{% url 'admin_rapport_list' %}" class="btn btn-circle btn-ghost"><i data-lucide="arrow-left"></i></a>
+        <h1 class="text-3xl font-black text-slate-800">Détail du Contrôle #{{ rapport.id }}</h1>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="md:col-span-2 space-y-6">
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Évaluation du site</h3>
+                
+                <div class="grid grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Propreté</p>
+                        <p class="text-xl font-black text-slate-800">{{ rapport.get_etat_proprete_display }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Superviseur</p>
+                        <p class="font-bold text-slate-700">{{ rapport.superviseur.get_full_name|default:rapport.superviseur.username }}</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-6 rounded-2xl">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase mb-3">Observations</h4>
+                    <p class="text-slate-700 leading-relaxed">{{ rapport.observations|default:"Aucune observation particulière." }}</p>
+                </div>
+
+                {% if rapport.incident %}
+                <div class="mt-6 p-6 bg-red-50 border border-red-100 rounded-2xl text-red-700">
+                    <h4 class="text-xs font-black uppercase mb-2 flex items-center gap-2">
+                        <i data-lucide="alert-circle" class="w-4 h-4"></i> Incident signalé
+                    </h4>
+                    <p class="text-sm font-medium">{{ rapport.problemes }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded-3xl border border-slate-200">
+                    <p class="text-[10px] font-black text-slate-400 uppercase mb-3">Photo du Site</p>
+                    {% if rapport.photo_site %}
+                        <img src="{{ rapport.photo_site.url }}" class="w-full h-full object-cover cursor-zoom-in" onclick="window.open(this.src)">
+                    {% else %}
+                        <div class="h-64 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 text-xs">Aucune photo</div>
+                    {% endif %}
+                </div>
+                <div class="bg-white p-4 rounded-3xl border border-slate-200">
+                    <p class="text-[10px] font-black text-slate-400 uppercase mb-3">Photo de Présence</p>
+                    {% if rapport.photo_presence %}
+                        <img src="{{ rapport.photo_presence.url }}" class="w-full h-full object-cover cursor-zoom-in" onclick="window.open(this.src)">
+                    {% else %}
+                        <div class="h-64 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 text-xs">Aucune photo</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-brandBlue p-8 rounded-3xl text-white shadow-lg">
+                <h3 class="text-[10px] font-bold uppercase opacity-70 mb-6">Effectifs Terrain</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between border-b border-white/10 pb-2">
+                        <span class="text-sm">Prévus</span>
+                        <span class="font-black text-lg">{{ rapport.techniciens_prevus }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-white/10 pb-2 text-green-300">
+                        <span class="text-sm">Présents</span>
+                        <span class="font-black text-lg">{{ rapport.techniciens_presents }}</span>
+                    </div>
+                    <div class="flex justify-between text-red-300">
+                        <span class="text-sm">Absents</span>
+                        <span class="font-black text-lg">{{ rapport.techniciens_absents }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {% if rapport.gps_lat %}
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 text-center">
+                <i data-lucide="map-pin" class="w-6 h-6 text-brandBlue mx-auto mb-2"></i>
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Géolocalisation</p>
+                <p class="text-xs font-bold text-slate-700">{{ rapport.gps_lat|floatformat:4 }}, {{ rapport.gps_long|floatformat:4 }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

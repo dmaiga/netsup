@@ -1,0 +1,69 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-8">
+        <a href="{% url 'user_list' %}" class="btn btn-ghost btn-sm gap-2">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Retour à la liste
+        </a>
+        <div class="flex gap-2">
+            <a href="{% url 'technicien_update' tech.pk %}" class="btn btn-sm btn-outline border-slate-200">
+                <i data-lucide="edit-3" class="w-4 h-4 mr-2"></i> Modifier la fiche
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="space-y-6">
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
+                <div class="w-32 h-32 mx-auto rounded-2xl bg-slate-100 mb-4 overflow-hidden border-4 border-white shadow-md">
+                    {% if tech.photo %}
+                        <img src="{{ tech.photo.url }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-3xl font-black text-slate-300">
+                            {{ tech.prenom|slice:":1" }}{{ tech.nom|slice:":1" }}
+                        </div>
+                    {% endif %}
+                </div>
+                <h2 class="text-xl font-black text-slate-800 uppercase">{{ tech.prenom }} {{ tech.nom }}</h2>
+                <span class="badge badge-success text-white font-black text-[10px] uppercase mt-2">Agent Actif</span>
+            </div>
+
+            <div class="bg-brandBlue p-6 rounded-3xl text-white shadow-lg">
+                <p class="text-[10px] font-bold uppercase opacity-70 mb-1">Affectation Actuelle</p>
+                <p class="text-lg font-black uppercase">
+                    {% if site_actuel %}{{ site_actuel.nom }}{% else %}Non affecté{% endif %}
+                </p>
+                {% if site_actuel %}
+                <p class="text-[10px] mt-2 opacity-80 italic">Code site : {{ site_actuel.code_site }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="md:col-span-2 space-y-6">
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest mb-6 border-b pb-4">Informations Personnelles</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Téléphone</label>
+                        <p class="font-bold text-slate-700">{{ tech.telephone|default:"Non renseigné" }}</p>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Type de Contrat</label>
+                        <p class="font-bold text-slate-700 uppercase">{{ tech.get_type_contrat_display }}</p>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Date d'embauche</label>
+                        <p class="font-bold text-slate-700">{{ tech.date_creation|date:"d F Y" }}</p>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">ID Interne</label>
+                        <p class="font-bold text-slate-700">#TECH-00{{ tech.id }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

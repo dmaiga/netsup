@@ -1,61 +1,116 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion | NETSUP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet"/>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { brandBlue: '#0056b3', brandRed: '#d9534f' }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
 
-{% block content %}
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        
+        <div class="mb-8 text-center">
+            <h1 class="text-4xl font-black italic tracking-tighter">
+                <span class="text-brandBlue">NET</span><span class="text-brandRed">SUP</span>
+            </h1>
+            <div class="h-1 w-12 bg-brandRed mx-auto mt-2 rounded-full opacity-20"></div>
+        </div>
 
-<div class="flex justify-center items-center min-h-screen">
+        <div class="max-w-md w-full">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-error mb-4 rounded-2xl text-white font-bold shadow-lg shadow-red-100 border-none">
+                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                    <span class="text-xs uppercase tracking-wide">{{ message }}</span>
+                </div>
+                {% endfor %}
+            {% endif %}
 
-<div class="card w-96 bg-base-100 shadow-xl">
+            <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/60 overflow-hidden">
+                <div class="p-8 md:p-12">
+                    <div class="mb-10 text-center">
+                        <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Espace Sécurisé</h2>
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mt-2">Authentification requise</p>
+                    </div>
 
-<div class="card-body">
+                    <form method="POST" class="space-y-5">
+                        {% csrf_token %}
 
-<h2 class="text-center text-2xl font-bold">
-Connexion NETSUP
-</h2>
+                        <div class="form-control">
+                            <label class="label px-1">
+                                <span class="label-text text-[10px] font-black text-slate-400 uppercase tracking-widest">Identifiant Téléphone</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-300">
+                                    <i data-lucide="phone" class="w-4 h-4"></i>
+                                </span>
+                                <input 
+                                    type="text" 
+                                    name="telephone" 
+                                    placeholder="ex: 70000000"
+                                    class="input input-bordered w-full pl-11 rounded-2xl font-bold text-slate-700 bg-slate-50/50 border-slate-200 focus:bg-white focus:border-brandBlue focus:ring-4 focus:ring-brandBlue/5 transition-all" 
+                                    required
+                                >
+                            </div>
+                        </div>
 
-<form method="POST">
+                        <div class="form-control">
+                            <label class="label px-1">
+                                <span class="label-text text-[10px] font-black text-slate-400 uppercase tracking-widest">Mot de passe</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-300">
+                                    <i data-lucide="lock" class="w-4 h-4"></i>
+                                </span>
+                                <input 
+                                    type="password" 
+                                    name="password" 
+                                    placeholder="••••••••"
+                                    class="input input-bordered w-full pl-11 rounded-2xl font-bold text-slate-700 bg-slate-50/50 border-slate-200 focus:bg-white focus:border-brandBlue focus:ring-4 focus:ring-brandBlue/5 transition-all" 
+                                    required
+                                >
+                            </div>
+                        </div>
 
-{% csrf_token %}
+                        <div class="pt-4">
+                            <button type="submit" class="btn btn-primary w-full bg-brandBlue hover:bg-blue-700 border-none text-white font-black uppercase tracking-widest h-14 rounded-2xl shadow-xl shadow-blue-100 transition-all hover:-translate-y-1 active:scale-95">
+                                Se connecter
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
-<div class="form-control">
+                <div class="bg-slate-50/80 p-6 border-t border-slate-50 text-center">
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.3em]">
+                        &copy; 2026 NETSUP MALI • SYSTEM v0.0.1
+                    </p>
+                </div>
+            </div>
+            
+            <p class="text-center mt-8 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                Besoin d'aide ? <a href="#" class="text-brandBlue hover:underline underline-offset-4">Support Technique</a>
+            </p>
+        </div>
+    </div>
 
-<label class="label">
-Téléphone
-</label>
-
-<input
-type="text"
-name="telephone"
-class="input input-bordered w-full"
-required
->
-
-</div>
-
-<div class="form-control mt-4">
-
-<label class="label">
-Mot de passe
-</label>
-
-<input
-type="password"
-name="password"
-class="input input-bordered w-full"
-required
->
-
-</div>
-
-<button class="btn btn-primary w-full mt-6">
-Se connecter
-</button>
-
-</form>
-
-</div>
-
-</div>
-
-</div>
-
-{% endblock %}
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

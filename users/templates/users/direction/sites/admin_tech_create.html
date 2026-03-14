@@ -1,0 +1,53 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-8">
+        <a href="{% url 'admin_site_detail' site.id %}" class="text-brandBlue text-[10px] font-black uppercase flex items-center gap-1 mb-2">
+            <i data-lucide="arrow-left" class="w-3 h-3"></i> Annuler
+        </a>
+        <h1 class="text-2xl font-black text-slate-800 tracking-tight">Affecter un Technicien</h1>
+        <p class="text-slate-500 text-sm italic">Nouveau collaborateur pour le site : <span class="text-brandBlue font-bold uppercase">{{ site.nom }}</span></p>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-2 gap-4">
+            <div class="form-control">
+                <label class="label font-bold text-slate-400 text-[10px] uppercase">Prénom</label>
+                <input type="text" name="prenom" class="input input-bordered rounded-xl" required>
+            </div>
+            <div class="form-control">
+                <label class="label font-bold text-slate-400 text-[10px] uppercase">Nom</label>
+                <input type="text" name="nom" class="input input-bordered rounded-xl" required>
+            </div>
+        </div>
+
+        <div class="form-control">
+            <label class="label font-bold text-slate-400 text-[10px] uppercase">Téléphone</label>
+            <input type="text" name="telephone" placeholder="0123456789" class="input input-bordered rounded-xl">
+        </div>
+
+        <div class="form-control">
+            <label class="label font-bold text-slate-400 text-[10px] uppercase">Type de Contrat</label>
+            <select name="type_contrat" class="select select-bordered rounded-xl font-bold">
+                <option value="cdi">CDI</option>
+                <option value="cdd">CDD</option>
+                <option value="prestation">Prestation</option>
+            </select>
+        </div>
+
+        <div class="form-control">
+            <label class="label font-bold text-slate-400 text-[10px] uppercase">Photo d'identité</label>
+            <input type="file" name="photo" class="file-input file-input-bordered w-full rounded-xl" accept="image/*">
+        </div>
+
+        <div class="pt-6">
+            <button type="submit" class="btn btn-primary btn-block bg-brandBlue border-none text-white font-black uppercase tracking-widest">
+                Valider l'affectation
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

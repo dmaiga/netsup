@@ -1,0 +1,82 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div>
+        <h1 class="text-3xl font-black text-slate-800 tracking-tight">Incidents Critiques</h1>
+        <p class="text-slate-500 text-sm italic">Gestion des alertes terrain et suivi des résolutions.</p>
+    </div>
+
+    <div class="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+        <a href="?statut=actifs" class="px-4 py-2 rounded-lg text-xs font-black uppercase transition-all {% if statut != 'resolu' %}bg-brandRed text-white{% else %}text-slate-400 hover:text-slate-600{% endif %}">
+            En cours
+        </a>
+        <a href="?statut=resolu" class="px-4 py-2 rounded-lg text-xs font-black uppercase transition-all {% if statut == 'resolu' %}bg-emerald-500 text-white{% else %}text-slate-400 hover:text-slate-600{% endif %}">
+            Archives / Résolus
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 gap-4">
+    {% for inc in page_obj %}
+    <div class="bg-white border {% if inc.incident_resolu %}border-slate-100{% else %}border-brandRed/20{% endif %} rounded-3xl p-6 shadow-sm hover:shadow-md transition-all">
+        <div class="flex flex-col md:flex-row justify-between gap-6">
+            
+            <div class="md:w-1/4 border-r border-slate-50 pr-4">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-2 {% if inc.incident_resolu %}bg-slate-100 text-slate-400{% else %}bg-red-50 text-brandRed{% endif %} rounded-lg">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    </div>
+                    <span class="font-black text-slate-800 uppercase text-sm tracking-tight">{{ inc.site.nom }}</span>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Signalé par :</p>
+                    <p class="text-xs font-bold text-slate-700">{{ inc.superviseur.username }}</p>
+                    <p class="text-[10px] text-slate-400">{{ inc.date|date:"d M Y à H:i" }}</p>
+                </div>
+            </div>
+
+            <div class="md:w-2/4">
+                <p class="text-[10px] font-bold text-brandRed uppercase mb-2">Description du problème :</p>
+                <p class="text-sm text-slate-600 leading-relaxed italic bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    "{{ inc.problemes }}"
+                </p>
+            </div>
+
+            <div class="md:w-1/4 flex flex-col justify-center items-end gap-3">
+                {% if not inc.incident_resolu %}
+                    <span class="badge badge-error text-white font-black text-[10px] py-3 px-4">ACTION REQUISE</span>
+                    <a href="{% url 'resoudre_incident' inc.id %}" class="btn btn-sm btn-success text-white font-black rounded-xl w-full">
+                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Marquer Résolu
+                    </a>
+                {% else %}
+                    <div class="text-right">
+                        <span class="badge badge-ghost text-emerald-600 font-black text-[10px] py-3 px-4 mb-2">RÉSOLU</span>
+                        <p class="text-[10px] text-slate-400 font-medium">Le {{ inc.date_resolution|date:"d/m/y" }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="bg-white rounded-3xl p-20 text-center border border-dashed border-slate-200">
+        <i data-lucide="shield-check" class="w-16 h-16 text-emerald-100 mx-auto mb-4"></i>
+        <p class="text-slate-400 font-medium">Aucun incident critique à signaler pour le moment.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="mt-8 flex justify-center">
+    <div class="join shadow-sm bg-white">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&statut={{ statut }}" class="join-item btn btn-sm border-slate-200 bg-white">Précédent</a>
+        {% endif %}
+        <button class="join-item btn btn-sm bg-brandRed text-white border-none px-6">Page {{ page_obj.number }}</button>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&statut={{ statut }}" class="join-item btn btn-sm border-slate-200 bg-white">Suivant</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

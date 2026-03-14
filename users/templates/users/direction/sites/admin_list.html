@@ -1,0 +1,79 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-black text-slate-800 tracking-tight">Gestion du Parc Sites</h1>
+    <a href="{% url 'admin_site_create' %}" class="btn btn-primary bg-brandBlue border-none text-white font-bold">
+        <i data-lucide="plus-circle" class="w-5 h-5"></i> Nouveau Site
+    </a>
+</div>
+
+<div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+    <table class="table w-full">
+        <thead>
+            <tr class="bg-slate-50/50 text-slate-400 text-[10px] uppercase tracking-widest">
+                <th class="p-6">Code & Nom</th>
+                <th>Client</th>
+                <th class="text-center">Prévus (Contrat)</th>
+                <th class="text-center">Affectés (Réels)</th>
+                <th class="text-center">Statut</th>
+                <th class="text-right p-6">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="text-sm">
+            {% for s in page_obj %} <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                <td class="p-6">
+                    <div class="font-black text-slate-700 uppercase">{{ s.nom }}</div>
+                    <div class="text-[10px] text-slate-400 font-bold">{{ s.code_site }}</div>
+                </td>
+                <td class="font-medium text-slate-600">{{ s.client_nom }}</td>
+                <td class="text-center">
+                    <span class="badge badge-ghost font-black">{{ s.nombre_techniciens_prevus }}</span>
+                </td>
+                <td class="text-center">
+                    <span class="font-bold {% if s.nb_tech_reels < s.nombre_techniciens_prevus %}text-brandRed{% else %}text-emerald-500{% endif %}">
+                        {{ s.nb_tech_reels }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    {% if s.actif %}
+                        <span class="badge badge-success text-white text-[9px] font-black uppercase">Actif</span>
+                    {% else %}
+                        <span class="badge badge-ghost text-slate-400 text-[9px] font-black uppercase">Inactif</span>
+                    {% endif %}
+                </td>
+                <td class="text-right p-6">
+                    <a href="{% url 'admin_site_detail' s.id %}" class="btn btn-ghost btn-xs text-brandBlue font-black uppercase">
+                        Paramétrer / Techs
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if page_obj.has_other_pages %}
+    <div class="p-6 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-50/30">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            Affichage de {{ page_obj.start_index }} à {{ page_obj.end_index }} sur {{ page_obj.paginator.count }} sites
+        </p>
+        
+        <div class="join shadow-sm">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="join-item btn btn-sm bg-white border-slate-200">«</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-sm bg-white border-slate-200">Précédent</a>
+            {% endif %}
+
+            <button class="join-item btn btn-sm bg-brandBlue text-white border-none px-6">
+                Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </button>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-sm bg-white border-slate-200">Suivant</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="join-item btn btn-sm bg-white border-slate-200">»</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

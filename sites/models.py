@@ -1,3 +1,4 @@
+#site/models
 from django.db import models
 from netsup.settings import URL_QR
 import qrcode
@@ -69,7 +70,9 @@ class Technicien(models.Model):
     site = models.ForeignKey(
         'sites.Site',
         on_delete=models.CASCADE,
-        related_name='techniciens'
+        related_name='techniciens',
+        blank=True,
+        null=True
     )
 
     actif = models.BooleanField(default=True)
