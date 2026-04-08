@@ -1,0 +1,185 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Rapports Terrain</h1>
+    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Audit et Contrôle Sanitaire</p>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm mb-6 divide-y divide-slate-100">
+    <form method="GET" class="flex flex-col">
+        <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-black text-slate-400 uppercase ml-1">Recherche globale</label>
+                <div class="relative">
+                    <input type="text" name="q" value="{{ query }}" placeholder="Site, agent, technicien..." 
+                           class="input input-sm input-bordered w-full pl-8 text-xs rounded-lg border-slate-200 focus:border-brandBlue">
+                   
+                </div>
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-black text-slate-400 uppercase ml-1">Filtrer par Site</label>
+                <select name="site" class="select select-sm select-bordered text-xs rounded-lg border-slate-200 font-medium">
+                    <option value="">Tous les sites</option>
+                    {% for s in sites %}
+                    <option value="{{ s.id }}" {% if selected_site == s.id|stringformat:"i" %}selected{% endif %}>{{ s.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-black text-slate-400 uppercase ml-1">Superviseur Référent</label>
+                <select name="superviseur" class="select select-sm select-bordered text-xs rounded-lg border-slate-200 font-medium">
+                    <option value="">Tous les superviseurs</option>
+                    {% for sup in superviseurs %}
+                    <option value="{{ sup.id }}" {% if selected_superviseur == sup.id|stringformat:"i" %}selected{% endif %}>{{ sup.get_full_name|default:sup.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="p-4 bg-slate-50/30 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-black text-slate-400 uppercase ml-1">État de propreté</label>
+                <select name="etat" class="select select-sm select-bordered text-xs rounded-lg border-slate-200 font-medium bg-white">
+                    <option value="">Tous les états</option>
+                    {% for code, label in etats %}
+                    <option value="{{ code }}" {% if selected_etat == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-black text-slate-400 uppercase ml-1">Période du contrôle</label>
+                <div class="flex items-center gap-2">
+                    <input type="date" name="date_debut" value="{{ date_debut }}" class="input input-sm input-bordered w-full text-[10px] rounded-lg border-slate-200 bg-white">
+                    <span class="text-slate-300 text-xs">/</span>
+                    <input type="date" name="date_fin" value="{{ date_fin }}" class="input input-sm input-bordered w-full text-[10px] rounded-lg border-slate-200 bg-white">
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="btn btn-sm bg-slate-800 hover:bg-slate-900 text-white border-none flex-1 rounded-lg">
+                    <i data-lucide="sliders-horizontal" size="14" class="mr-2"></i> Appliquer les filtres
+                </button>
+                <a href="{% url 'admin_rapport_list' %}" class="btn btn-sm btn-ghost border border-slate-200 px-3 rounded-lg text-slate-400 bg-white" title="Réinitialiser">
+                    <i data-lucide="rotate-ccw" size="14"></i>
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden text-[11px]">
+    <div class="overflow-x-auto">
+        <table class="table w-full border-separate border-spacing-0">
+            <thead>
+                <tr class="bg-slate-50/50">
+                    <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Date & Heure</th>
+                    <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Site & Responsable</th>
+                    <th class="p-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Effectif Présent</th>
+                    <th class="p-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">État Sanitaire</th>
+                    <th class="p-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Incident</th>
+                    <th class="p-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm">
+                {% for r in page_obj %}
+                <tr class="hover:bg-slate-50/30 transition-colors group">
+                    <td class="p-4 border-b border-slate-50 text-slate-500 font-bold">
+                        {{ r.date|date:"d/m/Y" }} <span class="text-slate-300 ml-1 font-medium">{{ r.date|date:"H:i" }}</span>
+                    </td>
+                    
+                    <td class="p-4 border-b border-slate-50">
+                        <div class="flex flex-col">
+                             <a href="{% url 'admin_site_detail' r.site.pk %}" class="font-black text-slate-800 uppercase text-[12px] tracking-tight group-hover:text-brandBlue transition-colors">
+                                {{ r.site.nom }}
+                            </a>
+                           
+                            <span class="text-[10px] font-bold flex items-center gap-1 mt-0.5">
+                                {% if r.site.superviseur %}
+                                    <span class="text-brandBlue/90 flex items-center gap-1">
+                                         {{ r.site.superviseur.get_full_name|default:r.site.superviseur.username }}
+                                    </span>
+                                {% else %}
+                                    <span class="italic flex items-center gap-1 opacity-80">
+                                        Non assigné
+                                    </span>
+                                {% endif %}
+                             </span>
+                        </div>
+                    </td>
+
+                    <td class="p-4 border-b border-slate-50 text-center">
+                        {% if r.techniciens_presents < r.nb_affectes_actuels %}
+                            <span class="text-[11px] font-black py-1 px-2 bg-red-50 text-brandRed rounded border border-red-100">
+                                {{ r.techniciens_presents }}<span class="opacity-30 mx-0.5">/</span>{{ r.nb_affectes_actuels }}
+                            </span>
+                        {% else %}
+                            <span class="text-[11px] font-bold py-1 px-2 bg-slate-100 text-slate-600 rounded">
+                                {{ r.techniciens_presents }}<span class="text-slate-300 mx-0.5">/</span>{{ r.nb_affectes_actuels }}
+                            </span>
+                        {% endif %}
+                        <p class="text-[8px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">Prévus: {{ r.site.nombre_techniciens_prevus }}</p>
+                    </td>
+
+                    <td class="p-4 border-b border-slate-50 text-center text-[10px] font-black uppercase">
+                        {% if r.etat_proprete == 'tres_propre' or r.etat_proprete == 'propre' %}
+                            <span class="text-emerald-600 flex items-center justify-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> {{ r.get_etat_proprete_display }}
+                            </span>
+                        {% else %}
+                            <span class="text-amber-500 flex items-center justify-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> {{ r.get_etat_proprete_display }}
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="p-4 border-b border-slate-50 text-center">
+                        {% if r.incident %}
+                            <div class="badge badge-error badge-sm text-[9px] font-black text-white p-2">SIGNALÉ</div>
+                        {% else %}
+                            <span class="text-slate-300 italic text-[10px]">Aucun</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="p-4 border-b border-slate-50 text-right">
+                        <div class="flex justify-end gap-1">
+                            <a href="{% url 'admin_rapport_detail' r.pk %}" class="btn btn-ghost btn-xs text-slate-400 hover:text-brandBlue border border-transparent hover:border-slate-200 bg-slate-50/50" title="Voir Rapport">
+                                VOIR
+                            </a>
+                            
+                           
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if page_obj.has_other_pages %}
+    <div class="p-4 bg-slate-50/50 border-t border-slate-100 flex justify-between items-center text-[10px]">
+        <span class="font-bold text-slate-400 uppercase tracking-widest">
+            Affichage {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+        </span>
+        <div class="flex gap-2">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&site={{ selected_site }}&superviseur={{ selected_superviseur }}&etat={{ selected_etat }}&date_debut={{ date_debut }}&date_fin={{ date_fin }}" 
+                   class="btn btn-ghost btn-xs border border-slate-200 bg-white">
+                    <i data-lucide="chevron-left" size="14"></i>
+                </a>
+            {% endif %}
+            
+            <span class="flex items-center px-3 font-black text-slate-700 bg-white border border-slate-200 rounded">
+                {{ page_obj.number }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&site={{ selected_site }}&superviseur={{ selected_superviseur }}&etat={{ selected_etat }}&date_debut={{ date_debut }}&date_fin={{ date_fin }}" 
+                   class="btn btn-ghost btn-xs border border-slate-200 bg-white">
+                    <i data-lucide="chevron-right" size="14"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}    
+</div>
+
+{% endblock %}

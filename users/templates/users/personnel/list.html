@@ -1,0 +1,86 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <h1 class="text-3xl font-black text-slate-800 tracking-tight">Ressources Humaines</h1>
+    
+    <div class="flex gap-3">
+        <form method="GET" class="relative">
+            <input type="hidden" name="tab" value="{{ tab }}">
+            <input type="text" name="q" value="{{ query }}" placeholder="Rechercher..." class="input input-bordered w-48 lg:w-64 pl-10 rounded-xl">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3.5 text-slate-400"></i>
+        </form>
+        
+        {% if tab == 'techs' %}
+            <a href="{% url 'technicien_create' %}" class="btn btn-primary bg-brandBlue border-none text-white font-black uppercase text-xs">
+                <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Recruter Agent
+            </a>
+        {% else %}
+            <a href="{% url 'user_create' %}" class="btn btn-primary bg-brandBlue border-none text-white font-black uppercase text-xs">
+                <i data-lucide="user-plus" class="w-4 h-4 mr-1"></i> Créer Accès
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="tabs tabs-boxed bg-slate-100 p-1 mb-6 w-fit rounded-2xl">
+    <a href="?tab=users" class="tab font-black uppercase text-[10px] px-6 {% if tab == 'users' %}tab-active bg-white text-brandBlue shadow-sm{% endif %}">
+        Encadrement (Admins/Sup)
+    </a>
+    <a href="?tab=techs" class="tab font-black uppercase text-[10px] px-6 {% if tab == 'techs' %}tab-active bg-white text-brandBlue shadow-sm{% endif %}">
+        Agents de terrain (Techniciens)
+    </a>
+</div>
+
+<div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+    <table class="table w-full">
+        <thead>
+            <tr class="bg-slate-50/50 text-slate-400 text-[10px] uppercase tracking-widest">
+                <th class="p-6">Nom & Prénom</th>
+                <th>{% if tab == 'techs' %}Contrat{% else %}Rôle{% endif %}</th>
+                <th>{% if tab == 'techs' %}Site Affecté{% else %}Dernière Connexion{% endif %}</th>
+                <th class="text-right p-6">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="text-sm">
+            {% for p in page_obj %}
+            <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                <td class="p-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-black uppercase text-brandBlue">
+                            {{ p.prenom|slice:":1" }}{{ p.nom|slice:":1" }}{{ p.first_name|slice:":1" }}{{ p.last_name|slice:":1" }}
+                        </div>
+                        <div class="font-black text-slate-700 uppercase">{{ p.prenom }} {{ p.nom }}{{ p.first_name }} {{ p.last_name }}</div>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge badge-ghost text-[9px] font-black uppercase">
+                        {{ p.get_type_contrat_display }}{% if p.is_superuser %}Direction{% elif p.username %}Superviseur{% endif %}
+                    </span>
+                </td>
+                <td>
+                    {% if tab == 'techs' %}
+                        <span class="text-xs font-bold {% if p.site %}text-brandBlue{% else %}text-amber-500 italic{% endif %}">
+                            {{ p.site.nom|default:"En attente d'affectation" }}
+                        </span>
+                    {% else %}
+                        <span class="text-xs text-slate-400">{{ p.last_login|date:"d/m/Y"|default:"-" }}</span>
+                    {% endif %}
+                </td>
+                <td class="text-right p-6">
+                    <div class="flex justify-end gap-2">
+                        {% if tab == 'techs' %}
+                            <a href="{% url 'technicien_update' p.pk %}" class="btn btn-ghost btn-xs text-slate-400"><i data-lucide="edit-2" class="w-4 h-4"></i></a>
+                            <a href="{% url 'technicien_soft_delete' p.pk %}" class="btn btn-ghost btn-xs text-brandRed"><i data-lucide="trash" class="w-4 h-4"></i></a>
+                        {% else %}
+                            <a href="{% url 'user_update' p.pk %}" class="btn btn-ghost btn-xs text-slate-400"><i data-lucide="edit-2" class="w-4 h-4"></i></a>
+                            <a href="{% url 'user_soft_delete' p.pk %}" class="btn btn-ghost btn-xs text-brandRed"><i data-lucide="trash" class="w-4 h-4"></i></a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+{% endblock %}

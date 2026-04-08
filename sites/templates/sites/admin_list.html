@@ -1,0 +1,142 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
+    <div>
+        <h1 class="text-xl font-bold text-slate-900 tracking-tight">Parc Sites</h1>
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pilotage des effectifs et assignations</p>
+    </div>
+    <a href="{% url 'admin_site_create' %}" class="btn btn-sm bg-brandBlue hover:bg-blue-700 border-none text-white font-bold px-4 rounded-lg">
+        <i data-lucide="plus" size="14" class="mr-1"></i> Nouveau Site
+    </a>
+</div>
+
+<div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm mb-4">
+    <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+        <div>
+            <label class="text-[9px] font-black text-slate-400 uppercase mb-1 block ml-1">Site / Code</label>
+            <input type="text" name="q_site" value="{{ q_site }}" placeholder="Rechercher..." 
+                   class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-brandBlue/10 outline-none transition-all">
+        </div>
+
+        <div>
+            <label class="text-[9px] font-black text-slate-400 uppercase mb-1 block ml-1">Client</label>
+            <input type="text" name="q_client" value="{{ q_client }}" placeholder="Nom client..." 
+                   class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-brandBlue/10 outline-none transition-all">
+        </div>
+
+        <div>
+            <label class="text-[9px] font-black text-slate-400 uppercase mb-1 block ml-1">Superviseur</label>
+            <select name="q_superviseur" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none">
+                <option value="">Tous</option>
+                {% for sup in liste_superviseurs %}
+                    <option value="{{ sup.id }}" {% if q_superviseur == sup.id|stringformat:"s" %}selected{% endif %}>
+                        {{ sup.get_full_name|default:sup.username }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="flex gap-2">
+            <button type="submit" class="btn btn-sm flex-1 bg-slate-800 hover:bg-black text-white border-none rounded-lg h-[34px] text-xs">
+                Filtrer
+            </button>
+            {% if q_site or q_client or q_superviseur %}
+            <a href="{% url 'admin_site_list' %}" class="btn btn-sm btn-ghost text-slate-400 hover:bg-slate-100 rounded-lg h-[34px]" title="Reset">
+                <i data-lucide="rotate-ccw" size="14"></i>
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="table table-sm w-full border-collapse">
+            <thead>
+                <tr class="bg-slate-50 border-b border-slate-200">
+                    <th class="py-3 px-4 text-[9px] font-black uppercase text-slate-500">Site & Client</th>
+                    <th class="py-3 px-4 text-[9px] font-black uppercase text-slate-500">Superviseur</th>
+                    <th class="py-3 px-4 text-[9px] font-black uppercase text-slate-500 text-center">Effectifs (Réel/Prévu)</th>
+                    <th class="py-3 px-4 text-[9px] font-black uppercase text-slate-500 text-center">Statut</th>
+                    <th class="py-3 px-4 text-[9px] font-black uppercase text-slate-500 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for s in page_obj %}
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3 px-4">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-slate-800 text-xs">{{ s.nom }}</span>
+                            <span class="text-[10px] text-slate-400 font-medium">{{ s.client_nom }} • {{ s.code_site }}</span>
+                        </div>
+                    </td>
+
+                    <td class="py-3 px-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded bg-blue-100 flex items-center justify-center text-[9px] font-bold text-brandBlue uppercase">
+                                {{ s.superviseur.first_name|slice:":1" }}{{ s.superviseur.last_name|slice:":1" }}
+                            </div>
+                            <span class="text-[11px] font-semibold text-slate-600">
+                                {{ s.superviseur.full_name|default:"Non assigné" }}
+                            </span>
+                        </div>
+                    </td>
+
+                    <td class="py-3 px-4 text-center">
+                        <div class="inline-flex items-center px-2 py-0.5 rounded-md {% if s.nb_tech_reels < s.nombre_techniciens_prevus %}bg-red-50 text-red-700{% else %}bg-emerald-50 text-emerald-700{% endif %}">
+                            <span class="text-xs font-black">{{ s.nb_tech_reels }}</span>
+                            <span class="mx-1 text-[10px] opacity-60">/</span>
+                            <span class="text-[11px] font-bold">{{ s.nombre_techniciens_prevus }}</span>
+                        </div>
+                    </td>
+
+
+
+                    <td class="py-3 px-4 text-center">
+                        {% if s.actif %}
+                            <span class="inline-flex items-center gap-1.5 text-[9px] font-black uppercase text-emerald-600">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Actif
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1.5 text-[9px] font-black uppercase text-slate-300">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Inactif
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="py-3 px-4 text-right">
+                        <a href="{% url 'admin_site_detail' s.id %}" class="btn btn-ghost btn-xs text-brandBlue hover:bg-blue-50 border-none">
+                            Détails <i data-lucide="arrow-right" size="12" class="ml-1"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="py-12 text-center text-slate-400 text-xs italic">
+                        Aucune donnée correspondant aux filtres.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="px-4 py-2 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            Page {{ page_obj.number }}/{{ page_obj.paginator.num_pages }}
+        </span>
+        <div class="join">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&q_site={{ q_site }}&q_client={{ q_client }}&q_superviseur={{ q_superviseur }}" class="join-item btn btn-xs bg-white border-slate-200">«</a>
+            {% endif %}
+            <button class="join-item btn btn-xs bg-white border-slate-200 no-animation">{{ page_obj.number }}</button>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&q_site={{ q_site }}&q_client={{ q_client }}&q_superviseur={{ q_superviseur }}" class="join-item btn btn-xs bg-white border-slate-200">»</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

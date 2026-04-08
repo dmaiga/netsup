@@ -1,0 +1,54 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+    <div class="mb-6">
+        <a href="{% url 'user_list' %}" class="text-xs font-bold text-brandBlue uppercase flex items-center gap-1">
+             <i data-lucide="arrow-left" class="w-3 h-3"></i> Retour à la liste
+        </a>
+        <h1 class="text-2xl font-black text-slate-800">
+            {% if tech %}Modifier {{ tech.prenom }}{% else %}Nouvel Agent de terrain{% endif %}
+        </h1>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-2 gap-4">
+            <div class="form-control">
+                <label class="label font-bold text-slate-400 text-[10px] uppercase">Prénom</label>
+                <input type="text" name="prenom" value="{{ tech.prenom }}" class="input input-bordered rounded-xl" required>
+            </div>
+            <div class="form-control">
+                <label class="label font-bold text-slate-400 text-[10px] uppercase">Nom</label>
+                <input type="text" name="nom" value="{{ tech.nom }}" class="input input-bordered rounded-xl" required>
+            </div>
+        </div>
+
+        <div class="form-control">
+            <label class="label font-bold text-slate-400 text-[10px] uppercase">Téléphone</label>
+            <input type="text" name="telephone" value="{{ tech.telephone }}" class="input input-bordered rounded-xl">
+        </div>
+
+        <div class="form-control">
+            <label class="label font-bold text-slate-400 text-[10px] uppercase">Contrat</label>
+            <select name="type_contrat" class="select select-bordered rounded-xl font-bold">
+                <option value="cdi" {% if tech.type_contrat == 'cdi' %}selected{% endif %}>CDI</option>
+                <option value="cdd" {% if tech.type_contrat == 'cdd' %}selected{% endif %}>CDD</option>
+                <option value="prestation" {% if tech.type_contrat == 'prestation' %}selected{% endif %}>Prestation</option>
+            </select>
+        </div>
+
+        <div class="form-control">
+            <label class="label font-bold text-slate-400 text-[10px] uppercase">Photo</label>
+            <input type="file" name="photo" class="file-input file-input-bordered w-full rounded-xl">
+        </div>
+
+        <div class="pt-4">
+            <button type="submit" class="btn btn-primary btn-block bg-brandBlue border-none text-white font-black uppercase">
+                Enregistrer l'agent
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

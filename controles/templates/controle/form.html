@@ -1,0 +1,235 @@
+{% extends "base_sup.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'superviseur_sites' %}" class="btn btn-ghost btn-sm gap-2 px-0">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Retour aux sites
+    </a>
+</div>
+
+<header class="mb-6">
+    <h1 class="text-2xl font-extrabold text-slate-800 leading-tight">
+        Contrôle : <span class="text-primary">{{ site.nom }}</span>
+    </h1>
+    <p class="text-sm text-slate-500 flex items-center gap-1 mt-1">
+        <i data-lucide="map-pin" class="w-3 h-3"></i> {{ site.adresse }}
+    </p>
+</header>
+
+<form method="POST" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+    <input type="hidden" name="gps_lat" id="gps_lat">
+    <input type="hidden" name="gps_long" id="gps_long">
+
+    {{ pointage_formset.management_form }}
+
+    <!-- POINTAGE NOMINAL DES AGENTS -->
+    <div class="card bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i data-lucide="users" class="w-4 h-4 text-primary"></i>
+                Pointage des agents
+            </h3>
+            <div class="flex gap-3 text-xs font-bold">
+                <span id="counter-presents" class="badge badge-success badge-outline">0 présents</span>
+                <span id="counter-absents" class="badge badge-error badge-outline">0 absents</span>
+            </div>
+        </div>
+
+        {% if agents %}
+        <div class="divide-y divide-slate-50">
+            {% for form_p in pointage_formset %}
+            <div class="pointage-row p-4 flex flex-col gap-2 transition-all"
+                 data-present="{{ form_p.initial.present|default:'true' }}">
+
+                {{ form_p.technicien_id }}
+
+                <!-- Ligne principale : avatar + nom + toggle présent -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-black text-brandBlue text-xs shrink-0 avatar-initials">
+                        {{ form_p.initial.nom_affiche|slice:":1" }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-slate-800 text-sm truncate">{{ form_p.initial.nom_affiche }}</p>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold">Agent de surface</p>
+                    </div>
+                    <label class="flex items-center gap-2 cursor-pointer shrink-0">
+                        <span class="text-xs font-bold text-slate-400 present-label">Présent</span>
+                        {{ form_p.present }}
+                    </label>
+                </div>
+
+                <!-- Zone absence (cachée si présent) -->
+                <div class="absence-zone hidden mt-1 p-3 bg-red-50 rounded-xl border border-red-100 space-y-2">
+                    <p class="text-[10px] font-bold text-red-600 uppercase tracking-wide">Motif d'absence</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        {{ form_p.motif_absence }}
+                        {{ form_p.commentaire }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-8 text-center text-slate-400 italic text-sm">
+            <i data-lucide="user-x" class="w-8 h-8 mx-auto mb-2 text-slate-200"></i>
+            Aucun agent affecté à ce site.<br>
+            <span class="text-xs">La direction peut en ajouter depuis le backoffice.</span>
+        </div>
+        {% endif %}
+
+        <!-- Résumé calculé -->
+        <div class="p-4 bg-slate-50 border-t border-slate-100">
+            <div class="grid grid-cols-3 gap-3 text-center">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Prévus</p>
+                    <p class="text-xl font-black text-slate-600">{{ site.nombre_techniciens_prevus }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-emerald-600 uppercase">Présents</p>
+                    <p class="text-xl font-black text-emerald-600" id="nb-presents">0</p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-red-500 uppercase">Absents</p>
+                    <p class="text-xl font-black text-red-500" id="nb-absents">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÉTAT DU SITE -->
+    <div class="card bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-100">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-warning"></i>
+                État du site
+            </h3>
+        </div>
+        <div class="p-5 space-y-4">
+            <div class="form-control">
+                <label class="label pb-1">
+                    <span class="label-text font-bold text-slate-400 text-xs uppercase">Qualité du nettoyage</span>
+                </label>
+                {{ form.etat_proprete }}
+                {% if form.etat_proprete.errors %}
+                    <p class="text-error text-xs mt-1">{{ form.etat_proprete.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="flex items-center justify-between p-3 bg-red-50 rounded-xl border border-red-100">
+                <div class="flex flex-col">
+                    <span class="font-bold text-red-700">Incident à signaler</span>
+                    <span class="text-[10px] text-red-500 uppercase font-bold leading-none">Sécurité, propreté, matériel...</span>
+                </div>
+                {{ form.incident }}
+            </div>
+
+            <div id="probleme-box" class="form-control hidden">
+                <label class="label pb-1">
+                    <span class="label-text font-bold text-error text-xs uppercase">Description de l'incident</span>
+                </label>
+                {{ form.problemes }}
+                {% if form.problemes.errors %}
+                    <p class="text-error text-xs mt-1">{{ form.problemes.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-control">
+                <label class="label pb-1">
+                    <span class="label-text font-bold text-slate-400 text-xs uppercase">Observations libres</span>
+                </label>
+                {{ form.observations }}
+            </div>
+        </div>
+    </div>
+
+    <!-- PREUVES PHOTOS -->
+    <div class="card bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-100">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i data-lucide="camera" class="w-4 h-4 text-secondary"></i>
+                Preuves photos
+            </h3>
+        </div>
+        <div class="p-5 space-y-4">
+            <div class="form-control">
+                <label class="label pb-1">
+                    <span class="label-text font-bold text-slate-400 text-xs uppercase">Photo du site</span>
+                </label>
+                {{ form.photo_site }}
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="pt-4 pb-12">
+        <button type="submit" class="btn btn-primary btn-lg w-full rounded-2xl shadow-lg shadow-primary/20 gap-3">
+            <i data-lucide="save" class="w-5 h-5"></i>
+            Enregistrer le contrôle
+        </button>
+    </div>
+</form>
+
+<script>
+// GPS
+if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(function(pos){
+        document.getElementById("gps_lat").value = pos.coords.latitude;
+        document.getElementById("gps_long").value = pos.coords.longitude;
+    }, function(err){ console.warn("GPS:", err.message); });
+}
+
+// Incident toggle
+const incidentToggle = document.querySelector(".toggle-error");
+const problemeBox = document.getElementById("probleme-box");
+function toggleProbleme() {
+    if (incidentToggle && incidentToggle.checked) {
+        problemeBox.classList.remove("hidden");
+    } else {
+        problemeBox.classList.add("hidden");
+    }
+}
+if (incidentToggle) {
+    incidentToggle.addEventListener("change", toggleProbleme);
+    toggleProbleme();
+}
+
+// Pointage : toggle présent/absent + compteurs
+function updateCounters() {
+    const rows = document.querySelectorAll(".pointage-row");
+    let presents = 0, absents = 0;
+    rows.forEach(row => {
+        const cb = row.querySelector("input[type=checkbox]");
+        const absZone = row.querySelector(".absence-zone");
+        const label = row.querySelector(".present-label");
+        const avatar = row.querySelector(".avatar-initials");
+        if (cb && cb.checked) {
+            presents++;
+            if (absZone) absZone.classList.add("hidden");
+            if (label) { label.textContent = "Présent"; label.className = "text-xs font-bold text-emerald-600 present-label"; }
+            if (avatar) { avatar.className = avatar.className.replace(/bg-\S+/, '').replace(/text-\S+Blue/, '') + " bg-emerald-50 text-emerald-700"; }
+            row.classList.remove("bg-red-50/30");
+        } else {
+            absents++;
+            if (absZone) absZone.classList.remove("hidden");
+            if (label) { label.textContent = "Absent"; label.className = "text-xs font-bold text-red-500 present-label"; }
+            if (avatar) { avatar.className = avatar.className.replace(/bg-\S+/, '').replace(/text-\S+/, '') + " bg-red-50 text-red-400"; }
+            row.classList.add("bg-red-50/30");
+        }
+    });
+    document.getElementById("nb-presents").textContent = presents;
+    document.getElementById("nb-absents").textContent = absents;
+    const cpEl = document.getElementById("counter-presents");
+    const caEl = document.getElementById("counter-absents");
+    if (cpEl) cpEl.textContent = presents + " présent" + (presents > 1 ? "s" : "");
+    if (caEl) caEl.textContent = absents + " absent" + (absents > 1 ? "s" : "");
+}
+
+document.querySelectorAll(".pointage-row input[type=checkbox]").forEach(cb => {
+    cb.addEventListener("change", updateCounters);
+});
+// Init
+updateCounters();
+</script>
+{% endblock %}

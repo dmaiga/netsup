@@ -1,0 +1,200 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+    <div>
+        <h1 class="text-3xl font-black text-slate-800 tracking-tight">Rapport de présence</h1>
+        <p class="text-slate-500 text-sm italic mt-1">Suivi nominal des agents par cycle de contrôle</p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner">
+            <a href="?type=semaine" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all {% if type_periode == 'semaine' %}bg-white text-slate-900 shadow-sm{% else %}text-slate-400 hover:text-slate-600{% endif %}">Semaine</a>
+            <a href="?type=mois" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all {% if type_periode == 'mois' %}bg-white text-slate-900 shadow-sm{% else %}text-slate-400 hover:text-slate-600{% endif %}">Mois</a>
+        </div>
+
+        <div class="flex items-center bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <a href="?type={{ type_periode }}&date={{ prev_date|date:'Y-m-d' }}" class="p-2 hover:bg-slate-50 border-r border-slate-100 transition-colors text-slate-400 hover:text-brandBlue">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </a>
+            <span class="px-4 py-1.5 text-[11px] font-black text-slate-700 uppercase tracking-tighter min-w-[140px] text-center">
+                {% if type_periode == "semaine" %}
+                    Semaine du {{ start|date:"d M Y" }}
+                {% else %}
+                    {{ start|date:"F Y" }}
+                {% endif %}
+            </span>
+            <a href="?type={{ type_periode }}&date={{ next_date|date:'Y-m-d' }}" class="p-2 hover:bg-slate-50 border-l border-slate-100 transition-colors text-slate-400 hover:text-brandBlue">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if agents_risque %}
+<div class="bg-red-50/50 border border-red-100 rounded-3xl p-6 mb-8">
+    <div class="flex items-center gap-3 mb-5">
+        <div class="w-8 h-8 bg-brandRed text-white rounded-lg flex items-center justify-center shadow-lg shadow-brandRed/20">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+        </div>
+        <div>
+            <h3 class="font-black text-slate-800 uppercase text-xs tracking-wider">Alertes Performance</h3>
+            <p class="text-[10px] text-slate-500 font-medium">Agents ayant un taux de présence critique (< 70%)</p>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for a in agents_risque %}
+        <div class="bg-white rounded-2xl border border-red-100 p-4 flex items-center gap-4 shadow-sm">
+            <div class="w-10 h-10 rounded-xl bg-red-50 text-brandRed flex items-center justify-center font-black text-xs border border-red-100 uppercase">
+                {{ a.technicien__prenom|slice:":1" }}{{ a.technicien__nom|slice:":1" }}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-black text-slate-800 text-sm truncate uppercase tracking-tight">{{ a.technicien__prenom }} {{ a.technicien__nom }}</p>
+                <div class="flex items-center gap-2 mt-1">
+                    <div class="flex-1 bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-brandRed h-full rounded-full" style="width: {{ a.taux }}%"></div>
+                    </div>
+                    <span class="text-[10px] font-black text-brandRed">{{ a.taux }}%</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <div class="lg:col-span-3">
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-100 bg-slate-50/30 flex justify-between items-center">
+                <h3 class="font-black text-slate-800 uppercase text-[11px] tracking-widest flex items-center gap-2">
+                    <i data-lucide="users" class="w-4 h-4 text-brandBlue"></i>
+                    Détails nominaux des agents
+                </h3>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="table w-full border-separate border-spacing-0">
+                    <thead>
+                        <tr class="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            <th class="p-4 pl-8 border-b border-slate-100">Agent & Affectations</th>
+                            <th class="text-center p-4 border-b border-slate-100">Pointages</th>
+                            <th class="text-center p-4 border-b border-slate-100">Statut</th>
+                            <th class="text-right p-4 pr-8 border-b border-slate-100 w-44">Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        {% for a in stats_agents %}
+                        <tr class="hover:bg-slate-50/30 transition-colors group">
+                            <td class="p-4 pl-8">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 group-hover:bg-brandBlue group-hover:text-white transition-colors flex items-center justify-center font-black text-xs shrink-0 border border-slate-200 uppercase">
+                                        {{ a.technicien__prenom|slice:":1" }}{{ a.technicien__nom|slice:":1" }}
+                                    </div>
+                                    <div class="flex flex-col min-w-0">
+                                        <span class="font-black text-slate-800 text-sm uppercase tracking-tight">{{ a.technicien__prenom }} {{ a.technicien__nom }}</span>
+                                        
+                                        <div class="flex flex-wrap gap-1.5 mt-1.5">
+                                            {% for site in a.sites %}
+                                            <span class="px-2 py-0.5 bg-blue-50 text-brandBlue border border-blue-100 rounded text-[9px] font-bold uppercase">
+                                                {{ site.nom }}
+                                            </span>
+                                            {% empty %}
+                                            <span class="text-[9px] text-slate-300 italic font-medium tracking-tight">Aucun site rattaché</span>
+                                            {% endfor %}
+                                        </div>
+
+                                        {% if a.superviseur %}
+                                        <div class="flex items-center gap-1.5 mt-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                                         
+                                            <span class="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">
+                                                Superviseur : {{ a.superviseur.full_name }}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="text-center p-4 font-black text-slate-700">
+                                {{ a.total }}
+                            </td>
+
+                            <td class="text-center p-4">
+                                <div class="inline-flex flex-col items-center">
+                                    <span class="text-emerald-600 font-black text-xs uppercase tracking-tighter">{{ a.presents }} Pr.</span>
+                                    <span class="text-brandRed font-black text-[10px] opacity-70 uppercase tracking-tighter">{{ a.absents }} Abs.</span>
+                                </div>
+                            </td>
+
+                            <td class="p-4 pr-8">
+                                <div class="flex flex-col items-end gap-1.5">
+                                    <span class="text-[11px] font-black {% if a.taux >= 90 %}text-emerald-600{% elif a.taux >= 70 %}text-amber-500{% else %}text-brandRed{% endif %}">
+                                        {{ a.taux }}%
+                                    </span>
+                                    <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden border border-slate-200/50">
+                                        <div class="h-full rounded-full transition-all duration-700
+                                            {% if a.taux >= 90 %}bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]
+                                            {% elif a.taux >= 70 %}bg-amber-400
+                                            {% else %}bg-brandRed shadow-[0_0_8px_rgba(239,68,68,0.3)]{% endif %}"
+                                            style="width: {{ a.taux }}%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if stats_agents.has_other_pages %}
+            <div class="p-6 border-t border-slate-100 bg-slate-50/30 flex justify-center items-center gap-4">
+                {% if stats_agents.has_previous %}
+                <a href="?type={{ type_periode }}&page_agents={{ stats_agents.previous_page_number }}" class="btn btn-sm btn-ghost hover:bg-white rounded-xl shadow-sm border border-slate-200 uppercase text-[10px] font-black">Précédent</a>
+                {% endif %}
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Page {{ stats_agents.number }} / {{ stats_agents.paginator.num_pages }}</span>
+                {% if stats_agents.has_next %}
+                <a href="?type={{ type_periode }}&page_agents={{ stats_agents.next_page_number }}" class="btn btn-sm btn-ghost hover:bg-white rounded-xl shadow-sm border border-slate-200 uppercase text-[10px] font-black">Suivant</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="lg:col-span-1 space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden sticky top-6">
+            <div class="p-5 border-b border-slate-100 bg-slate-50/30">
+                <h3 class="font-black text-slate-800 uppercase text-[10px] tracking-widest flex items-center gap-2">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-brandRed"></i>
+                    Santé des Sites
+                </h3>
+            </div>
+            <div class="p-4 space-y-3">
+                {% for s in stats_sites %}
+                <div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl hover:border-slate-300 transition-all group">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="font-black text-slate-700 text-[10px] uppercase truncate max-w-[120px] tracking-tight group-hover:text-brandBlue transition-colors">{{ s.controle__site__nom }}</p>
+                        <span class="text-[10px] font-black {% if s.taux >= 90 %}text-emerald-600{% elif s.taux >= 70 %}text-amber-600{% else %}text-brandRed{% endif %}">
+                            {{ s.taux|default:"0" }}%
+                        </span>
+                    </div>
+                    <div class="w-full bg-slate-200/50 h-1 rounded-full overflow-hidden mb-2">
+                        <div class="h-full rounded-full {% if s.taux >= 90 %}bg-emerald-500{% elif s.taux >= 70 %}bg-amber-400{% else %}bg-brandRed{% endif %}"
+                             style="width: {{ s.taux|default:0 }}%"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+                        <span>{{ s.presents }} présents</span>
+                        <span>{{ s.total }} pointages</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-10">
+                    <p class="text-slate-300 italic text-[11px] font-medium tracking-tight">Aucun contrôle enregistré sur cette période</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

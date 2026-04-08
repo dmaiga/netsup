@@ -1,0 +1,142 @@
+{% extends "base_sup.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'controle_list' %}" class="btn btn-ghost btn-sm gap-2 px-0">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Retour à l'historique
+    </a>
+</div>
+
+<header class="mb-6">
+    <div class="flex items-start justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-800">{{ controle.site.nom }}</h1>
+            <p class="text-sm text-slate-500 mt-1">{{ controle.date|date:"l d F Y à H:i" }}</p>
+        </div>
+        {% if controle.incident %}
+        <span class="badge badge-error gap-1 font-bold">
+            <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+            {% if controle.incident_resolu %}Incident résolu{% else %}Incident actif{% endif %}
+        </span>
+        {% endif %}
+    </div>
+</header>
+
+<!-- Résumé présence -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-2xl border border-slate-100 p-4 text-center shadow-sm">
+        <p class="text-[10px] font-bold text-slate-400 uppercase">Prévus</p>
+        <p class="text-2xl font-black text-slate-600">{{ controle.techniciens_prevus }}</p>
+    </div>
+    <div class="bg-emerald-50 rounded-2xl border border-emerald-100 p-4 text-center shadow-sm">
+        <p class="text-[10px] font-bold text-emerald-600 uppercase">Présents</p>
+        <p class="text-2xl font-black text-emerald-600">{{ controle.techniciens_presents }}</p>
+    </div>
+    <div class="bg-red-50 rounded-2xl border border-red-100 p-4 text-center shadow-sm">
+        <p class="text-[10px] font-bold text-red-500 uppercase">Absents</p>
+        <p class="text-2xl font-black text-red-500">{{ controle.techniciens_absents }}</p>
+    </div>
+</div>
+
+<!-- Pointage nominal -->
+{% if pointages %}
+<div class="card bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden mb-6">
+    <div class="p-4 bg-slate-50 border-b border-slate-100">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i data-lucide="list-checks" class="w-4 h-4 text-primary"></i>
+            Pointage nominal
+        </h3>
+    </div>
+    <div class="divide-y divide-slate-50">
+        {% for p in pointages %}
+        <div class="flex items-center gap-3 px-4 py-3 {% if not p.present %}bg-red-50/40{% endif %}">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0
+                        {% if p.present %}bg-emerald-50 text-emerald-700{% else %}bg-red-50 text-red-400{% endif %}">
+                {{ p.technicien.prenom|slice:":1" }}{{ p.technicien.nom|slice:":1" }}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-bold text-sm text-slate-800">{{ p.technicien.prenom }} {{ p.technicien.nom }}</p>
+                {% if not p.present and p.motif_absence %}
+                    <p class="text-[10px] text-red-500 font-bold uppercase">{{ p.get_motif_absence_display }}</p>
+                {% endif %}
+                {% if p.commentaire %}
+                    <p class="text-xs text-slate-400 italic">{{ p.commentaire }}</p>
+                {% endif %}
+            </div>
+            <span class="badge text-xs font-bold {% if p.present %}badge-success{% else %}badge-error{% endif %} badge-outline shrink-0">
+                {% if p.present %}Présent{% else %}Absent{% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- État et incident -->
+<div class="card bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden mb-6">
+    <div class="p-4 bg-slate-50 border-b border-slate-100">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4 text-warning"></i>
+            État du site
+        </h3>
+    </div>
+    <div class="p-5 space-y-3">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-400 uppercase">Qualité nettoyage</span>
+            <span class="badge font-bold
+                {% if controle.etat_proprete == 'tres_propre' %}badge-success
+                {% elif controle.etat_proprete == 'propre' %}badge-info
+                {% elif controle.etat_proprete == 'moyen' %}badge-warning
+                {% else %}badge-error{% endif %}">
+                {{ controle.get_etat_proprete_display }}
+            </span>
+        </div>
+        {% if controle.incident %}
+        <div class="p-3 bg-red-50 rounded-xl border border-red-100">
+            <p class="text-xs font-bold text-red-600 uppercase mb-1">Incident signalé</p>
+            <p class="text-sm text-slate-700">{{ controle.problemes }}</p>
+        </div>
+        {% endif %}
+        {% if controle.observations %}
+        <div>
+            <p class="text-xs font-bold text-slate-400 uppercase mb-1">Observations</p>
+            <p class="text-sm text-slate-600 italic">{{ controle.observations }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Photos -->
+{% if controle.photo_site or controle.photo_presence %}
+<div class="card bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden mb-6">
+    <div class="p-4 bg-slate-50 border-b border-slate-100">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i data-lucide="camera" class="w-4 h-4 text-secondary"></i>
+            Photos
+        </h3>
+    </div>
+    <div class="p-5 grid grid-cols-2 gap-4">
+        {% if controle.photo_site %}
+        <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Site</p>
+            <img src="{{ controle.photo_site.url }}" class="rounded-xl w-full object-cover aspect-square">
+        </div>
+        {% endif %}
+        {% if controle.photo_presence %}
+        <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Feuille présence</p>
+            <img src="{{ controle.photo_presence.url }}" class="rounded-xl w-full object-cover aspect-square">
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- GPS -->
+{% if controle.gps_lat and controle.gps_long %}
+<div class="bg-white border border-slate-100 rounded-2xl p-4 text-xs text-slate-400 flex items-center gap-2 mb-6">
+    <i data-lucide="map-pin" class="w-3 h-3"></i>
+    GPS : {{ controle.gps_lat|floatformat:5 }}, {{ controle.gps_long|floatformat:5 }}
+</div>
+{% endif %}
+{% endblock %}

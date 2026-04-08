@@ -1,0 +1,178 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'admin_rapport_list' %}" class="btn btn-sm btn-circle btn-ghost border border-slate-200 shadow-sm">
+                <i data-lucide="arrow-left" size="18"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Rapport #{{ rapport.id }}</h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ rapport.date|date:"d F Y à H:i" }}</p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="window.print()" class="btn btn-sm btn-ghost border-slate-200 text-slate-500">
+                <i data-lucide="printer" size="14"></i> Imprimer
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="lg:col-span-2 space-y-6">
+            
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-start mb-6">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Évaluation du site</h3>
+                    <span class="text-[10px] font-medium text-slate-400">ID Site: {{ rapport.site.id }}</span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">État Sanitaire</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="w-2 h-2 rounded-full {% if rapport.etat_proprete == 'mauvais' %}bg-brandRed{% else %}bg-emerald-500{% endif %}"></span>
+                            <p class="text-lg font-bold text-slate-800">{{ rapport.get_etat_proprete_display }}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Superviseur</p>
+                        <p class="text-sm font-bold text-slate-700 mt-1">{{ rapport.superviseur.get_full_name|default:rapport.superviseur.username }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Site Web</p>
+                        <p class="text-sm font-bold text-brandBlue mt-1 uppercase">{{ rapport.site.nom }}</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                    <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-2">Observations Terrain</h4>
+                    <p class="text-sm text-slate-600 leading-relaxed">{{ rapport.observations|default:"Aucune observation transmise par le superviseur." }}</p>
+                </div>
+
+                {% if rapport.incident %}
+                <div class="mt-4 p-4 bg-red-50 border border-brandRed/10 rounded-xl">
+                    <div class="flex items-center gap-2 text-brandRed mb-1">
+                        <i data-lucide="alert-triangle" size="16"></i>
+                        <h4 class="text-xs font-bold uppercase tracking-tight">Incident Signalé</h4>
+                    </div>
+                    <p class="text-xs font-medium">{{ rapport.problemes }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Preuve Visuelle du Site</h3>
+                {% if rapport.photo_site %}
+                    <div class="relative group overflow-hidden rounded-xl bg-slate-100 aspect-video md:aspect-auto">
+                        <img src="{{ rapport.photo_site.url }}" class="w-full object-contain max-h-[500px]">
+                        <a href="{{ rapport.photo_site.url }}" target="_blank" class="absolute bottom-4 right-4 btn btn-sm bg-black/50 text-white border-none backdrop-blur-md">
+                            <i data-lucide="maximize" size="14"></i> Agrandir
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="h-48 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400">
+                        <i data-lucide="image-off" size="24" class="mb-2"></i>
+                        <p class="text-[10px] font-bold uppercase">Aucun cliché disponible</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            
+            <div class="bg-slate-900 p-6 rounded-2xl text-white shadow-sm relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 opacity-10 text-white">
+                     <i data-lucide="users" size="80"></i>
+                </div>
+                <h3 class="text-[10px] font-bold uppercase opacity-50 mb-4 tracking-widest">Contrôle des Effectifs</h3>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="text-center">
+                        <p class="text-xl font-bold">{{ techniciens_affectes.count }}</p>
+                        <p class="text-[9px] opacity-60 uppercase">Affectés</p>
+                    </div>
+                    <div class="text-center border-x border-white/10">
+                        <p class="text-xl font-bold text-emerald-400">{{ rapport.techniciens_presents }}</p>
+                        <p class="text-[9px] opacity-60 uppercase">Présents</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xl font-bold {% if rapport.techniciens_presents < techniciens_affectes.count %}text-brandRed{% endif %}">
+                            {{ rapport.techniciens_absents }}
+                        </p>
+                        <p class="text-[9px] opacity-60 uppercase">Absents</p>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
+                    <span class="text-[9px] font-bold opacity-40 uppercase">Objectif Contrat</span>
+                    <span class="text-[10px] font-black px-2 py-0.5 bg-white/10 rounded">{{ rapport.site.nombre_techniciens_prevus }}</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="clipboard-check" size="14"></i> Pointage du Jour
+                    </h3>
+                    {% if rapport.pointages.count < techniciens_affectes.count %}
+                        <span class="badge badge-error badge-xs text-[8px] font-bold text-white uppercase px-2 py-2">Incomplet</span>
+                    {% endif %}
+                </div>
+                <div class="divide-y divide-slate-50">
+                    {% for p in rapport.pointages.all %}
+                    <div class="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-[10px] 
+                                {% if p.present %}bg-emerald-50 text-emerald-600{% else %}bg-red-50 text-brandRed{% endif %}">
+                                {{ p.technicien.prenom|slice:":1" }}{{ p.technicien.nom|slice:":1" }}
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-xs font-bold text-slate-800 uppercase">{{ p.technicien.prenom }} {{ p.technicien.nom }}</p>
+                                    {% if p.technicien in techniciens_affectes %}
+                                        <div class="w-1.5 h-1.5 rounded-full bg-blue-400" title="Agent affecté officiellement"></div>
+                                    {% else %}
+                                        <span class="text-[8px] font-black text-amber-600 bg-amber-50 px-1 rounded border border-amber-100 uppercase">Renfort</span>
+                                    {% endif %}
+                                </div>
+                                {% if p.present %}
+                                    <span class="text-[9px] font-medium text-emerald-500 uppercase italic">Confirmé sur site</span>
+                                {% else %}
+                                    <span class="text-[9px] font-bold text-brandRed uppercase">Absent : {{ p.get_motif_absence_display }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if not p.present and p.commentaire %}
+                        <div class="tooltip tooltip-left" data-tip="{{ p.commentaire }}">
+                            <i data-lucide="message-square" size="12" class="text-slate-300"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="p-8 text-center text-slate-400 italic text-xs">
+                        Aucun pointage nominal durant ce contrôle.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if rapport.gps_lat %}
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-2 bg-slate-100 rounded-lg text-slate-500">
+                        <i data-lucide="map-pin" size="16"></i>
+                    </div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Localisation GPS</p>
+                </div>
+                <p class="text-xs font-bold text-slate-700 font-mono">{{ rapport.gps_lat|floatformat:5 }}, {{ rapport.gps_long|floatformat:5 }}</p>
+                <a href="https://www.google.com/maps/search/?api=1&query={{ rapport.gps_lat }},{{ rapport.gps_long }}" target="_blank" class="btn btn-xs btn-block mt-4 btn-ghost border-slate-200 text-brandBlue text-[10px]">
+                    Ouvrir dans Google Maps
+                </a>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

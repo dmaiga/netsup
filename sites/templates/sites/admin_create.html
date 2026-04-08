@@ -1,0 +1,103 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{% url 'admin_site_list' %}" class="text-brandBlue text-xs font-black uppercase flex items-center gap-1 mb-2">
+            <i data-lucide="arrow-left" class="w-3 h-3"></i> Annuler
+        </a>
+        <h1 class="text-3xl font-black text-slate-800 tracking-tight">
+            Ajouter un nouveau site
+        </h1>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" class="card bg-base-100 shadow-xl border border-slate-200">
+        {% csrf_token %}
+
+        <div class="card-body space-y-6">
+
+            <!-- Nom -->
+            <div>
+                <label class="label">
+                    <span class="label-text font-semibold">Nom du site</span>
+                </label>
+                {{ form.nom }}
+            </div>
+
+            <!-- Code -->
+            <div>
+                <label class="label">
+                    <span class="label-text font-semibold">Code site</span>
+                </label>
+                {{ form.code_site }}
+            </div>
+
+            <!-- Client -->
+            <div>
+                <label class="label">
+                    <span class="label-text font-semibold">Client</span>
+                </label>
+                {{ form.client_nom }}
+            </div>
+
+            <!-- Adresse -->
+            <div>
+                <label class="label">
+                    <span class="label-text font-semibold">Adresse</span>
+                </label>
+                {{ form.adresse }}
+            </div>
+
+            <!-- Techniciens -->
+            <div>
+                <label class="label">
+                    <span class="label-text font-semibold">Nombre de techniciens prévus</span>
+                </label>
+                {{ form.nombre_techniciens_prevus }}
+            </div>
+
+            <!-- Coordonnées -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="label">
+                        <span class="label-text font-semibold">Latitude</span>
+                    </label>
+                    {{ form.latitude }}
+                </div>
+                <div>
+                    <label class="label">
+                        <span class="label-text font-semibold">Longitude</span>
+                    </label>
+                    {{ form.longitude }}
+                </div>
+            </div>
+
+            <!-- Superviseur -->
+            <div>
+                <label class="label">
+                    <span class="label-text font-semibold">Superviseur</span>
+                </label>
+                {{ form.superviseur }}
+            </div>
+
+            <!-- Actif -->
+            <div class="flex items-center justify-between pt-4 border-t">
+                <span class="font-semibold">Site actif</span>
+                {{ form.actif }}
+            </div>
+
+            <!-- Submit -->
+            <div class="pt-6">
+                <button type="submit"
+                        class="btn btn-primary w-full bg-brandBlue border-none text-white font-black uppercase">
+                    Créer le site et générer le QR Code
+                </button>
+            </div>
+
+        </div>
+    </form>
+</div>
+{% endblock %}

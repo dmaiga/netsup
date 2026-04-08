@@ -1,0 +1,132 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Pilotage Direction</h1>
+        <p class="text-slate-400 text-xs font-medium uppercase tracking-wider mt-1">
+            Semaine du {{ debut_semaine|date:"d" }} au {{ fin_semaine|date:"d F Y" }}
+        </p>
+    </div>
+    <div class="flex items-center gap-3 px-4 py-2 bg-white border border-slate-200 rounded-lg shadow-sm">
+        <i data-lucide="calendar" size="16" class="text-slate-400"></i>
+        <span class="text-xs font-bold text-slate-700">{{ aujourd_hui|date:"l d F"|capfirst }}</span>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Parc Sites Actifs</p>
+        <div class="flex items-baseline gap-2 mt-1">
+            <h3 class="text-2xl font-bold text-slate-900">{{ total_sites }}</h3>
+            <span class="text-[10px] text-slate-400 font-medium">Unités</span>
+        </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Objectif Hebdomadaire</p>
+        <div class="flex items-baseline gap-2 mt-1">
+            <h3 class="text-2xl font-bold text-slate-900">{{ total_controles_hebdo }}</h3>
+            <span class="text-xs text-slate-400">/ {{ objectif_hebdo }}</span>
+        </div>
+        <div class="w-full bg-slate-100 h-1 rounded-full mt-3">
+            <div class="bg-slate-800 h-full rounded-full" style="width: {{ progression_hebdo }}%"></div>
+        </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Effectif Terrain</p>
+        <div class="flex items-baseline gap-2 mt-1">
+            <h3 class="text-2xl font-bold text-slate-900">{{ techniciens_presents }}</h3>
+            <span class="text-[10px] text-emerald-600 font-bold">Présents</span>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-2 italic">Absences : {{ techniciens_absents }}</p>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl border-2 border-brandRed/10 shadow-sm relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-2 opacity-10 text-brandRed">
+             <i data-lucide="alert-circle" size="48"></i>
+        </div>
+        <p class="text-[10px] font-bold text-brandRed uppercase tracking-widest">Alertes Critiques</p>
+        <h3 class="text-2xl font-bold text-brandRed mt-1">{{ total_incidents_actifs }}</h3>
+        <p class="text-[10px] text-slate-500 mt-2 font-medium">Action immédiate requise</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    
+    <div class="lg:col-span-8">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div class="flex items-center gap-2">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-widest">Incidents non résolus</h3>
+                    <span class="badge badge-sm bg-slate-800 text-white border-none">{{ incidents_actifs|length }}</span>
+                </div>
+                <a href="{% url 'liste_incidents_critiques'%}" class="text-[10px] font-bold text-slate-400 hover:text-brandBlue transition-colors uppercase">
+                    Consulter la liste
+                </a>
+            </div>
+
+            <div class="divide-y divide-slate-50">
+                {% for inc in incidents_actifs %}
+                <div class="p-5 hover:bg-slate-50/50 transition-colors group">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-sm font-bold text-slate-800 group-hover:text-brandBlue">{{ inc.site.nom }}</span>
+                        <span class="text-[10px] font-medium text-slate-400">{{ inc.date|date:"d M, H:i" }}</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4 leading-relaxed max-w-2xl">
+                        {{ inc.problemes|truncatewords:25 }}
+                    </p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-500 uppercase">
+                                {{ inc.superviseur.username|slice:":1" }}
+                            </div>
+                            <span class="text-[10px] font-medium text-slate-400">Signalé par {{ inc.superviseur.username }}</span>
+                        </div>
+                        <a href="{% url 'admin_rapport_detail' inc.pk %}" class="btn btn-ghost btn-xs text-brandBlue font-bold">
+                             DÉTAILS <i data-lucide="chevron-right" size="12"></i>
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="py-20 text-center">
+                    <i data-lucide="check-circle" size="32" class="text-slate-200 mx-auto mb-3"></i>
+                    <p class="text-slate-400 text-sm font-medium">Situation nominale : aucun incident actif.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="lg:col-span-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-100">
+                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <i data-lucide="activity" size="14" class="text-brandRed"></i>
+                    Qualité Critique (Mauvais)
+                </h3>
+            </div>
+            <div class="p-5 space-y-3">
+                {% for sc in sites_critiques %}
+                <div class="flex items-center justify-between p-3 border border-slate-100 rounded-lg hover:border-brandRed/30 transition-all">
+                    <div>
+                        <p class="text-xs font-bold text-slate-800 uppercase">{{ sc.site.nom }}</p>
+                        <p class="text-[10px] text-slate-400 font-medium">Reçu le {{ sc.date|date:"d/m" }}</p>
+                    </div>
+                    <a href="{% url 'admin_rapport_detail' sc.pk %}" class="btn btn-ghost btn-xs btn-square text-slate-400 hover:text-brandRed">
+                        <i data-lucide="eye" size="14"></i>
+                    </a>
+                </div>
+                {% empty %}
+                <p class="text-center py-6 text-[11px] text-slate-400 italic">Aucune anomalie majeure détectée.</p>
+                {% endfor %}
+            </div>
+            <div class="p-4 bg-slate-50/50 text-center border-t border-slate-100">
+              <a href="{% url 'admin_rapport_list' %}" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-brandBlue transition-all">Tous les rapports</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

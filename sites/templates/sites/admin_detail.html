@@ -1,0 +1,248 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{% url 'admin_site_list' %}" class="text-slate-400 text-[10px] font-black uppercase flex items-center gap-1 mb-2 hover:text-brandBlue">
+        <i data-lucide="arrow-left" class="w-3 h-3"></i> Retour liste
+    </a>
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+    <div class="flex-1 min-w-0">
+        <h1 class="text-3xl font-black text-slate-800 tracking-tight truncate">
+            {{ site.nom }}
+        </h1>
+        <div class="flex items-center gap-2 mt-1">
+            <span class="text-[10px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase tracking-wider">
+                {{ site.code_site }}
+            </span>
+            <p class="text-xs font-bold text-slate-400">
+                {{ site.adresse }} <span class="mx-1 text-slate-200">·</span> Client : <span class="text-slate-500">{{ site.client_nom }}</span>
+            </p>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-4 bg-white border border-slate-200 p-2 pr-4 rounded-2xl shadow-sm">
+        <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0">
+            <i data-lucide="user-check" class="w-5 h-5 text-slate-400"></i>
+        </div>
+        <div class="min-w-[120px]">
+            <p class="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">Superviseur</p>
+            <p class="text-xs font-bold text-slate-700 truncate">
+                {% if site.superviseur %}
+                    {{ site.superviseur.get_full_name|default:site.superviseur.username }}
+                {% else %}
+                    <span class="text-amber-500 italic font-medium">Non assigné</span>
+                {% endif %}
+            </p>
+        </div>
+
+        {% if site.superviseur %}
+        <div class="ml-2 pl-4 border-l border-slate-100 flex flex-col items-center">
+            <div class="{% if est_regulier %}text-emerald-600{% else %}text-amber-600{% endif %} flex flex-col items-center">
+                <span class="text-sm font-black leading-none">{{ nb_visites_semaine }}<span class="text-[10px] opacity-40 mx-0.5">/</span>2</span>
+                <span class="text-[8px] font-black uppercase tracking-tighter mt-1">Visites / 7j</span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="flex items-center gap-2">
+        <a href="{% url 'admin_rapport_list' %}?q_site={{ site.nom }}" 
+           class="btn btn-sm bg-white hover:bg-slate-50 border-slate-200 text-slate-600 gap-2 text-[10px] font-black uppercase rounded-xl shadow-sm">
+            <i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-400"></i>
+            Rapports
+        </a>
+        <a href="{% url 'rapport_presence' %}?site={{ site.id }}" 
+           class="btn btn-sm bg-white hover:bg-slate-50 border-slate-200 text-slate-600 gap-2 text-[10px] font-black uppercase rounded-xl shadow-sm">
+            <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-slate-400"></i>
+            Présence
+        </a>
+    </div>
+</div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    
+    <div class="lg:col-span-4 space-y-6">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest">Configuration Site</h3>
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Assigner Superviseur</label>
+                    <select name="superviseur_id" class="select select-sm select-bordered w-full rounded-lg text-xs font-bold">
+                        <option value="">Aucun</option>
+                        {% for sup in tous_superviseurs %}
+                        <option value="{{ sup.id }}" {% if site.superviseur_id == sup.id %}selected{% endif %}>{{ sup.get_full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Effectif Prévu</label>
+                    <input type="number" name="nb_prevus" value="{{ site.nombre_techniciens_prevus }}" class="input input-sm input-bordered w-full font-black text-brandBlue">
+                </div>
+                <div class="flex items-center gap-2 py-2">
+                    <input type="checkbox" name="actif" {% if site.actif %}checked{% endif %} class="checkbox checkbox-xs checkbox-primary">
+                    <span class="text-xs font-bold text-slate-600">Site Actif</span>
+                </div>
+                <button type="submit" class="btn btn-sm btn-block bg-slate-800 text-white border-none rounded-lg text-[10px] uppercase font-black">Mettre à jour</button>
+            </form>
+        </div>
+
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="p-4 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
+        <h3 class="text-[10px] font-black text-slate-800 uppercase tracking-widest">Journal du Superviseur</h3>
+        <i data-lucide="history" class="w-3 h-3 text-slate-400"></i>
+    </div>
+    
+    <div class="max-h-[400px] overflow-y-auto divide-y divide-slate-50">
+        {% for ctrl in historique_superviseur %}
+        <a href="{% url 'admin_rapport_detail' ctrl.id %}" class="block p-3 hover:bg-blue-50/50 transition-colors group">
+            <div class="flex justify-between items-start">
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-slate-700 uppercase group-hover:text-brandBlue transition-colors">
+                        {{ ctrl.date|date:"d/m/Y H:i" }} 
+                    </span>
+                    <span class="text-[8px] font-bold text-slate-400">
+                        PAR {{ ctrl.superviseur.username|upper }} 
+                    </span>
+                </div>
+                <div class="flex flex-col items-end">
+                    <span class="text-[9px] font-black {% if ctrl.taux_presence < 100 %}text-amber-500{% else %}text-emerald-500{% endif %}">
+                        {{ ctrl.taux_presence }}% 
+                    </span>
+                    <i data-lucide="chevron-right" class="w-3 h-3 text-slate-200 group-hover:text-brandBlue transition-transform group-hover:translate-x-0.5"></i>
+                </div>
+            </div>
+            
+            <div class="mt-2 flex flex-wrap gap-1.5">
+                <span class="px-1.5 py-0.5 bg-slate-100 rounded-[4px] text-[8px] font-black uppercase text-slate-500 border border-slate-200/50">
+                    {{ ctrl.get_etat_proprete_display }}
+                </span>
+                
+                {% if ctrl.incident %}
+                <span class="px-1.5 py-0.5 bg-red-50 rounded-[4px] text-[8px] font-black uppercase text-red-500 border border-red-100 flex items-center gap-1">
+                    <span class="w-1 h-1 bg-red-500 rounded-full animate-ping"></span> INCIDENT
+                </span>
+                {% endif %}
+            </div>
+        </a>
+        {% empty %}
+        <div class="p-8 text-center">
+            <i data-lucide="clipboard-x" class="w-8 h-8 mx-auto mb-2 text-slate-200"></i>
+            <p class="text-[10px] text-slate-400 italic">Aucun rapport de supervision pour le moment.</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if historique_superviseur %}
+    <div class="p-3 bg-slate-50/50 border-t border-slate-50 text-center">
+        <a href="{% url 'admin_rapport_list' %}?q_site={{ site.nom }}" class="text-[9px] font-black text-brandBlue uppercase hover:underline">
+            Voir l'historique complet
+        </a>
+    </div>
+    {% endif %}
+</div>
+    </div>
+
+    <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-white">
+            <h3 class="text-[10px] font-black text-slate-800 uppercase tracking-widest">Effectifs Actifs (Terrain)</h3>
+            <span class="text-[10px] font-black px-2 py-1 bg-blue-50 text-brandBlue rounded-lg">
+                {{ affectations.count }} / {{ site.nombre_techniciens_prevus }} Agents
+            </span>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="table table-sm w-full">
+                <thead>
+                    <tr class="bg-slate-50/50 border-b border-slate-100">
+                        <th class="text-[9px] font-black uppercase text-slate-400">Agent</th>
+                        <th class="text-[9px] font-black uppercase text-slate-400">Contrat</th>
+                        <th class="text-[9px] font-black uppercase text-slate-400 text-center">Statut</th>
+                        <th class="text-right"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% for aff in affectations %}
+                    <tr class="hover:bg-slate-50/50 transition-all {% if not aff.actif %}opacity-40 italic{% endif %}">
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-[9px] font-black text-slate-500">
+                                    {{ aff.technicien.prenom|slice:":1" }}{{ aff.technicien.nom|slice:":1" }}
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-bold text-slate-700 uppercase">{{ aff.technicien.prenom }} {{ aff.technicien.nom }}</span>
+                                    <span class="text-[9px] text-slate-400 font-mono">{{ aff.technicien.matricule }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-[10px] font-medium text-slate-500">
+                            {{ aff.technicien.rh.get_type_contrat_display|default:"Non défini" }}
+                        </td>
+                        <td class="text-center">
+                            {% if aff.actif %}
+                            <span class="text-[8px] font-black text-emerald-500 uppercase bg-emerald-50 px-2 py-0.5 rounded">Actif</span>
+                            {% else %}
+                            <span class="text-[8px] font-black text-slate-400 uppercase bg-slate-100 px-2 py-0.5 rounded">Retiré</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+                            <form method="POST" action="{% url 'gestion_affectations' site.id %}" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="affectation_id" value="{{ aff.id }}">
+                                {% if aff.actif %}
+                                <input type="hidden" name="action" value="retirer">
+                                <button type="submit" class="btn btn-ghost btn-xs text-red-400 hover:text-red-600"><i data-lucide="user-minus" class="w-3 h-3"></i></button>
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="p-4 bg-slate-50 border-t border-slate-100">
+            <button onclick="document.getElementById('modal-affectation').checked=true" class="btn btn-xs btn-block bg-white border-slate-200 text-slate-600 font-black uppercase text-[9px]">
+                <i data-lucide="plus" class="w-3 h-3 mr-1"></i> Ajouter un agent au site
+            </button>
+        </div>
+    </div>
+</div>
+<input type="checkbox" id="modal-affectation" class="modal-toggle" />
+<div class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box rounded-3xl border border-slate-200">
+        <h3 class="font-black text-lg text-slate-800">Affecter un agent</h3>
+        <p class="py-2 text-xs text-slate-400 uppercase font-bold tracking-widest border-b mb-4">
+            Site : {{ site.nom }}
+        </p>
+        
+        <form action="{% url 'gestion_affectations' site.id %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="affecter">
+            
+            <div class="form-control w-full">
+                <label class="label"><span class="label-text font-bold text-[10px] uppercase text-slate-400">Sélectionner l'agent disponible</span></label>
+                <select name="technicien_id" class="select select-bordered w-full rounded-xl font-bold text-slate-700 focus:ring-brandBlue/10">
+                    <option disabled selected>Choisir un technicien...</option>
+                    {% for td in techniciens_disponibles %}
+                        <option value="{{ td.id }}">
+                            {{ td.prenom }} {{ td.nom|upper }} 
+                            {% if td.get_sites_actifs.count > 0 %}(Déjà sur {{ td.get_sites_actifs.count }} site){% endif %}
+                        </option>
+                    {% empty %}
+                        <option disabled>Aucun agent disponible</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="modal-action">
+                <label for="modal-affectation" class="btn btn-ghost text-[10px] font-black uppercase">Annuler</label>
+                <button type="submit" class="btn bg-slate-800 hover:bg-black text-white border-none px-8 rounded-xl text-[10px] font-black uppercase">
+                    Confirmer l'affectation
+                </button>
+            </div>
+        </form>
+    </div>
+    <label class="modal-backdrop" for="modal-affectation">Fermer</label>
+</div>
+{% endblock %}

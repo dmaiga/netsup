@@ -1,0 +1,288 @@
+#controles/models
+from django.db import models
+from django.conf import settings
+
+
+
+class ControleSite(models.Model):
+
+    site = models.ForeignKey('sites.Site', on_delete=models.CASCADE)
+    superviseur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    date = models.DateTimeField(auto_now_add=True)
+
+    gps_lat = models.FloatField(null=True, blank=True)
+    gps_long = models.FloatField(null=True, blank=True)
+
+    techniciens_prevus = models.IntegerField()
+    techniciens_presents = models.IntegerField()
+    techniciens_absents = models.IntegerField()
+
+    ETAT_CHOICES = [
+        ('tres_propre', 'Très propre'),
+        ('propre', 'Propre'),
+        ('moyen', 'Moyen'),
+        ('mauvais', 'Mauvais'),
+    ]
+
+    etat_proprete = models.CharField(max_length=20, choices=ETAT_CHOICES)
+
+    incident = models.BooleanField(default=False)
+    problemes = models.TextField(blank=True)
+
+    incident_resolu = models.BooleanField(default=False)
+    date_resolution = models.DateTimeField(null=True, blank=True)
+
+    observations = models.TextField(blank=True)
+
+    photo_site = models.ImageField(upload_to='sites/', blank=True, null=True)
+    photo_presence = models.ImageField(upload_to='presence/', blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.site} - {self.date}"
+
+    @property
+    def taux_presence(self):
+        if self.techniciens_prevus and self.techniciens_prevus > 0:
+            return round((self.techniciens_presents / self.techniciens_prevus) * 100)
+        return 0
+
+
+class PointageAgent(models.Model):
+    """
+    Enregistrement nominal du pointage d'un agent lors d'un contrôle.
+    Créé automatiquement pour chaque agent affecté au site au moment du contrôle.
+    """
+    MOTIF_ABSENCE = [
+        ('', '—'),
+        ('retard', 'Retard'),
+        ('absent_np', 'Absent non prévenu'),
+        ('absent_prev', 'Absent prévenu'),
+        ('conge', 'Congé'),
+        ('maladie', 'Maladie'),
+        ('autre', 'Autre'),
+    ]
+
+    controle = models.ForeignKey(
+        ControleSite,
+        on_delete=models.CASCADE,
+        related_name='pointages'
+    )
+    technicien = models.ForeignKey(
+        'users.Technicien',
+        on_delete=models.CASCADE,
+        related_name='pointages'
+    )
+    present = models.BooleanField(default=True)
+    motif_absence = models.CharField(max_length=20, choices=MOTIF_ABSENCE, blank=True, default='')
+    commentaire = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        unique_together = ('controle', 'technicien')
+        ordering = ['technicien__nom', 'technicien__prenom']
+
+    def __str__(self):
+        statut = "présent" if self.present else f"absent ({self.motif_absence})"
+        return f"{self.technicien} @ {self.controle.site} — {statut}"
+
+
+#site/models
+from django.db import models
+from netsup.settings import URL_QR
+import qrcode
+from io import BytesIO
+from django.core.files import File
+
+
+class Site(models.Model):
+
+    nom = models.CharField(max_length=200)
+    code_site = models.CharField(max_length=50, unique=True)
+
+    adresse = models.CharField(max_length=255)
+    client_nom = models.CharField(max_length=200)
+
+    nombre_techniciens_prevus = models.IntegerField()
+
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+
+    qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
+
+    actif = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.nom
+
+    def generate_qr_code(self):
+        url = f"{URL_QR}/{self.id}"
+        qr = qrcode.make(url)
+        buffer = BytesIO()
+        qr.save(buffer, format="PNG")
+        filename = f"site_{self.id}.png"
+        self.qr_code.save(filename, File(buffer), save=False)
+
+    def save(self, *args, **kwargs):
+        creating = self.pk is None
+        super().save(*args, **kwargs)
+        if creating and not self.qr_code:
+            self.generate_qr_code()
+            super().save(update_fields=["qr_code"])
+
+    def get_agents_actifs(self):
+        """Retourne les techniciens actuellement affectés à ce site."""
+        from users.models import Technicien
+        return Technicien.objects.filter(
+            affectations__site=self,
+            affectations__actif=True
+        ).distinct()
+
+
+class AffectationAgent(models.Model):
+    """
+    Relation M2M entre Technicien et Site.
+    Un agent peut être sur plusieurs sites simultanément.
+    """
+    technicien = models.ForeignKey(
+         'users.Technicien',
+        on_delete=models.CASCADE,
+        related_name='affectations'
+    )
+    site = models.ForeignKey(
+        Site,
+        on_delete=models.CASCADE,
+        related_name='affectations'
+    )
+    date_debut = models.DateField(auto_now_add=True)
+    date_fin = models.DateField(null=True, blank=True)
+    actif = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('technicien', 'site')
+        ordering = ['-date_debut']
+
+    def __str__(self):
+        statut = "actif" if self.actif else "inactif"
+        return f"{self.technicien} → {self.site} ({statut})"
+
+#models/users 
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import UserManager as DjangoUserManager
+from django.db import models
+
+from sites.models import Site
+
+
+class Technicien(models.Model):
+
+    matricule = models.CharField(max_length=50, unique=True)
+
+    nom = models.CharField(max_length=100)
+    prenom = models.CharField(max_length=100)
+
+    genre = models.CharField(max_length=10, choices=(('M','Homme'),('F','Femme')))
+    date_naissance = models.DateField(null=True, blank=True)
+    lieu_naissance = models.CharField(max_length=150, blank=True)
+
+    quartier = models.CharField(max_length=150, blank=True)
+
+    telephone = models.CharField(max_length=20, unique=True)
+
+    photo = models.ImageField(upload_to='techniciens/', blank=True, null=True)
+
+    actif = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.prenom} {self.nom}"
+       
+    def get_sites_actifs(self):
+        """Retourne tous les sites sur lesquels cet agent est actuellement affecté."""
+        return Site.objects.filter(
+            affectations__technicien=self,
+            affectations__actif=True
+        ).distinct()
+
+    
+    
+class UserManager(DjangoUserManager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
+class User(AbstractUser):
+
+    ROLE_CHOICES = (
+        ('superviseur', 'Superviseur'),
+        ('admin', 'Administration'),
+        ('direction', 'Direction'),
+    )
+    technicien = models.OneToOneField(
+        Technicien,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+
+    telephone = models.CharField(max_length=20, unique=True)
+
+    photo = models.ImageField(upload_to='users/', blank=True, null=True)
+
+    objects = UserManager()
+
+    is_active = models.BooleanField(default=True)
+
+    is_deleted = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.username} - {self.role}"
+    
+class Conge(models.Model):
+
+    technicien = models.ForeignKey(Technicien, on_delete=models.CASCADE)
+
+    date_debut = models.DateField()
+    date_fin = models.DateField()
+
+    motif = models.CharField(max_length=100)
+
+    valide = models.BooleanField(default=False)
+
+class ProfilRH(models.Model):
+    technicien = models.OneToOneField(Technicien, on_delete=models.CASCADE, related_name="rh")
+    TYPE_CONTRAT = (
+        ('cdi', 'CDI'),
+        ('cdd', 'CDD'),
+        ('prestation', 'Prestation'),
+    )
+    type_contrat = models.CharField(max_length=20, choices=TYPE_CONTRAT)
+
+    niveau_contrat = models.IntegerField(default=1)  # renouvellement
+
+    numero_inps = models.CharField(max_length=50, blank=True)
+    numero_amo = models.CharField(max_length=50, blank=True)
+
+    salaire = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    TYPE_HORAIRE = (
+        ('temps_plein', 'Temps plein'),
+        ('mi_temps', 'Mi-temps'),
+    )
+
+    type_horaire = models.CharField(max_length=20, choices=TYPE_HORAIRE)
+
+    DISPONIBILITE = (
+        ('matin', 'Matin'),
+        ('soir', 'Soir'),
+        ('les_deux', 'Les deux'),
+    )
+
+    disponibilite = models.CharField(max_length=20, choices=DISPONIBILITE)
+
+    date_embauche = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"RH - {self.technicien}"

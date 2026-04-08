@@ -1,0 +1,124 @@
+{% extends "base_sup.html" %}
+
+{% block content %}
+<div class="flex flex-col gap-1 mb-6">
+    <h1 class="text-2xl font-black text-slate-800 tracking-tight">Historique</h1>
+    <p class="text-sm text-slate-500">Rapports de visite et contrôles effectués.</p>
+</div>
+
+<div class="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+    
+    <a href="{% url 'controle_list' %}" 
+       class="btn btn-xs rounded-full px-4 border-slate-200 {% if not current_filter %}bg-brandBlue text-white border-brandBlue shadow-sm{% else %}btn-outline text-slate-500{% endif %}">
+        Tous
+    </a>
+
+    <a href="{% url 'controle_list' %}?filter=semaine" 
+       class="btn btn-xs rounded-full px-4 border-slate-200 {% if current_filter == 'semaine' %}bg-brandBlue text-white border-brandBlue shadow-sm{% else %}btn-outline text-slate-500{% endif %}">
+        Cette semaine
+    </a>
+
+    <a href="{% url 'controle_list' %}?filter=incidents" 
+       class="btn btn-xs rounded-full px-4 border-slate-200 {% if current_filter == 'incidents' %}bg-brandRed text-white border-brandRed shadow-sm{% else %}btn-outline text-brandRed hover:bg-brandRed/5{% endif %}">
+        <i data-lucide="alert-circle" class="w-3 h-3 mr-1"></i>
+        Incidents
+    </a>
+</div>
+
+<div class="space-y-4">
+    {% for c in controles %}
+    <a href="{% url 'controle_detail' c.id %}" class="block group">
+        <div class="card bg-white border border-slate-200 shadow-sm group-active:scale-[0.98] transition-all rounded-xl overflow-hidden">
+            <div class="p-4">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex flex-col">
+                        <span class="font-bold text-slate-800 text-base leading-tight">{{ c.site.nom }}</span>
+                        <div class="flex items-center gap-1.5 mt-1 text-slate-400">
+                            <i data-lucide="calendar" class="w-3 h-3 text-slate-300"></i>
+                            <span class="text-[11px] font-medium tracking-wide uppercase">{{ c.date|date:"d M Y" }} · {{ c.date|date:"H:i" }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="badge badge-sm font-black text-[9px] py-3 rounded-md border
+                        {% if c.etat_proprete == 'Mauvais' %} bg-red-50 text-brandRed border-red-100
+                        {% elif c.etat_proprete == 'Moyen' %} bg-amber-50 text-amber-600 border-amber-100
+                        {% else %} bg-emerald-50 text-emerald-600 border-emerald-100 {% endif %}">
+                        {{ c.etat_proprete|upper }}
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 pt-3 border-t border-slate-50">
+                    <div class="flex items-center gap-1.5">
+                        <i data-lucide="users" class="w-3.5 h-3.5 text-slate-400"></i>
+                        <span class="text-xs text-slate-600 font-bold">{{ c.techniciens_presents }} <span class="text-[10px] font-medium text-slate-400">présents</span></span>
+                    </div>
+
+                    {% if c.incident %}
+                    <div class="flex items-center gap-1.5 text-brandRed">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brandRed opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-brandRed"></span>
+                        </span>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Incident</span>
+                    </div>
+                    {% else %}
+                    <div class="flex items-center gap-1.5 text-slate-300">
+                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                        <span class="text-[10px] font-bold uppercase">RAS</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="ml-auto text-slate-300 group-hover:text-brandBlue transition-colors">
+                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+    {% empty %}
+    <div class="flex flex-col items-center justify-center py-16 px-6 text-center bg-white border border-dashed border-slate-200 rounded-2xl">
+        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+            <i data-lucide="folder-open" class="w-8 h-8 text-slate-300"></i>
+        </div>
+        <h3 class="text-md font-bold text-slate-800">Aucun résultat</h3>
+        <p class="text-xs text-slate-400 mt-1 max-w-[200px]">Nous n'avons trouvé aucun contrôle pour ce filtre.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% if controles.has_other_pages %}
+<nav class="flex justify-center mt-10 mb-6">
+    <div class="join bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+        
+        {% if controles.has_previous %}
+            <a href="?page={{ controles.previous_page_number }}{% if current_filter %}&filter={{ current_filter }}{% endif %}" 
+               class="join-item btn btn-sm btn-ghost text-brandBlue">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </a>
+        {% else %}
+            <button class="join-item btn btn-sm btn-disabled opacity-30">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+        {% endif %}
+
+        <span class="join-item btn btn-sm btn-ghost no-animation text-[10px] font-black px-4 pointer-events-none">
+            {{ controles.number }} / {{ controles.paginator.num_pages }}
+        </span>
+
+        {% if controles.has_next %}
+            <a href="?page={{ controles.next_page_number }}{% if current_filter %}&filter={{ current_filter }}{% endif %}" 
+               class="join-item btn btn-sm btn-ghost text-brandBlue">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </a>
+        {% else %}
+            <button class="join-item btn btn-sm btn-disabled opacity-30">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+        {% endif %}
+        
+    </div>
+</nav>
+{% endif %}
+
+<div class="h-24"></div>
+{% endblock %}

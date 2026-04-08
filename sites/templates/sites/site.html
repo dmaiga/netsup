@@ -1,0 +1,109 @@
+{% extends "base_sup.html" %}
+
+{% block content %}
+<div class="flex flex-col gap-4 mb-8">
+    <div>
+        <h1 class="text-2xl font-extrabold text-slate-800">Mes Sites</h1>
+        <p class="text-sm text-slate-500">Sélectionnez un site pour débuter l'inspection.</p>
+    </div>
+
+    <div class="relative group">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+            <i data-lucide="search" class="w-5 h-5"></i>
+        </span>
+<form method="GET" class="relative group">
+    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+        <i data-lucide="search" class="w-5 h-5"></i>
+    </span>
+
+    <input
+        type="text"
+        name="q"
+        value="{{ query }}"
+        placeholder="Rechercher un site ou une adresse..."
+        class="input input-bordered w-full pl-10 bg-white border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all rounded-xl shadow-sm"
+    >
+</form>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="sitesGrid">
+    {% for site in page_obj %}
+    <div class="site-card card bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow rounded-2xl overflow-hidden" 
+         data-name="{{ site.nom|lower }}" 
+         data-address="{{ site.adresse|lower }}">
+        <div class="p-5">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex flex-col gap-1">
+                    <h2 class="text-lg font-bold text-slate-800 leading-tight site-title">
+                        {{ site.nom }}
+                    </h2>
+
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between py-3 px-4 bg-slate-50 rounded-xl mb-4">
+                <div class="flex flex-col">
+                    <span class="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Staff prévu</span>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="users" class="w-4 h-4 text-primary"></i>
+                        <span class="font-bold text-slate-700">{{ site.nombre_techniciens_prevus }}</span>
+                    </div>
+                </div>
+                <div class="h-8 w-px bg-slate-200"></div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Adresse</span>
+                    <span class="text-xs font-mono font-bold">{{ site.adresse }}</span>
+                </div>
+            </div>
+
+            <a href="{% url 'controle_site' site.id %}" 
+               class="btn btn-primary w-full gap-2 rounded-xl shadow-sm">
+                <i data-lucide="clipboard-edit" class="w-4 h-4"></i>
+                Lancer le contrôle
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full flex flex-col items-center justify-center py-16 text-center">
+        <div class="bg-slate-100 p-6 rounded-full mb-4">
+            <i data-lucide="map-off" class="w-12 h-12 text-slate-300"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-800">Aucun site trouvé</h3>
+    </div>
+    {% endfor %}
+
+    <div id="noResults" class="hidden col-span-full flex flex-col items-center justify-center py-16 text-center">
+        <p class="text-slate-500">Aucun site ne correspond à votre recherche.</p>
+    </div>
+    <div class="flex justify-center mt-8">
+
+<div class="join">
+
+{% if page_obj.has_previous %}
+<a class="join-item btn"
+   href="?page={{ page_obj.previous_page_number }}&q={{ query }}">
+Précédent
+</a>
+{% endif %}
+
+<span class="join-item btn btn-disabled">
+Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+</span>
+
+{% if page_obj.has_next %}
+<a class="join-item btn"
+   href="?page={{ page_obj.next_page_number }}&q={{ query }}">
+Suivant
+</a>
+{% endif %}
+
+</div>
+
+</div>
+</div>
+
+<div class="h-20 lg:h-8"></div>
+
+ 
+{% endblock %}

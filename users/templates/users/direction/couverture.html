@@ -1,0 +1,150 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Objectif Semaine</p>
+        <div class="flex items-end gap-2 mt-1">
+            <span class="text-2xl font-black text-slate-800">{{ stats.realise }}</span>
+            <span class="text-sm font-bold text-slate-300 mb-1">/ {{ stats.objectif }} visites</span>
+        </div>
+    </div>
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sites sous gestion</p>
+        <div class="flex items-end gap-2 mt-1">
+            <span class="text-2xl font-black text-slate-800">{{ stats.nb_sites }}</span>
+            <span class="text-sm font-bold text-slate-300 mb-1 text-uppercase">Sites actifs</span>
+        </div>
+    </div>
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Taux de couverture</p>
+        <div class="flex items-center gap-3 mt-1">
+            <span class="text-2xl font-black {% if stats.percent < 80 %}text-amber-500{% else %}text-emerald-500{% endif %}">{{ stats.percent }}%</span>
+            <progress class="progress {% if stats.percent < 80 %}progress-warning{% else %}progress-success{% endif %} w-24" value="{{ stats.percent }}" max="100"></progress>
+        </div>
+    </div>
+</div>
+
+<div class="mb-6 flex flex-col lg:flex-row justify-between items-center gap-4">
+    <div class="flex items-center gap-4">
+        <h1 class="text-xl font-black text-slate-800">Couverture</h1>
+        <div class="flex items-center bg-slate-100 rounded-lg p-1">
+            <a href="?date={{ semaine_precedente }}&superviseur={{ sup_id }}&q={{ query }}" class="btn btn-ghost btn-xs px-1"><i data-lucide="chevron-left" size="14"></i></a>
+            <span class="text-[9px] font-black px-3 text-slate-600 uppercase">{{ debut_semaine|date:"d M" }} - {{ fin_semaine|date:"d M" }}</span>
+            <a href="?date={{ semaine_suivante }}&superviseur={{ sup_id }}&q={{ query }}" class="btn btn-ghost btn-xs px-1"><i data-lucide="chevron-right" size="14"></i></a>
+        </div>
+    </div>
+    
+    <form method="GET" class="flex flex-wrap gap-2">
+        <input type="hidden" name="date" value="{{ debut_semaine|date:'Y-m-d' }}">
+        
+        <select name="superviseur" onchange="this.form.submit()" class="select select-sm select-bordered rounded-lg text-[10px] font-bold uppercase">
+            <option value="">Tous les superviseurs</option>
+            {% for s in tous_superviseurs %}
+                <option value="{{ s.id }}" {% if sup_id == s.id|stringformat:"s" %}selected{% endif %}>{{ s.get_full_name|default:s.username }}</option>
+            {% endfor %}
+        </select>
+
+        <input type="text" name="q" value="{{ query }}" placeholder="Rechercher site..." class="input input-sm input-bordered rounded-lg text-xs w-48">
+        
+        <button type="submit" class="btn btn-sm bg-slate-800 text-white rounded-lg"><i data-lucide="search" size="14"></i></button>
+        {% if query or sup_id %}
+            <a href="?" class="btn btn-sm btn-ghost text-red-500"><i data-lucide="rotate-ccw" size="14"></i></a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="table w-full border-separate border-spacing-0">
+            <thead>
+                <tr class="bg-slate-50/80">
+                    <th class="p-4 pl-6 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100">Site & Client</th>
+                    <th class="p-4 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100">Superviseur Assigné</th>
+                    <th class="text-center p-4 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100">Conformité</th>
+                    <th class="text-center p-4 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100">Progression</th>
+                    <th class="text-right p-4 pr-6 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100">Statut</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm">
+                {% for item in page_obj %}
+                <tr class="hover:bg-slate-50/50 transition-colors group">
+                    <td class="p-4 pl-6 border-b border-slate-50">
+                        <div class="flex flex-col">
+                            <a href="{% url 'admin_site_detail' item.site.pk %}" class="font-bold text-slate-800 text-sm leading-tight hover:text-brandBlue hover:underline decoration-2 underline-offset-4 transition-all">
+                                {{ item.site.nom }}
+                            </a>
+                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter mt-1">{{ item.site.client_nom }}</span>
+                        </div>
+                    </td>
+
+                    <td class="p-4 border-b border-slate-50">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-brandBlue">
+                                <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                            </div>
+                            <span class="text-[11px] font-black text-slate-700 uppercase tracking-tight">
+                                {% if item.site.superviseur %}
+                                    {{ item.site.superviseur.get_full_name|default:item.site.superviseur.username }}
+                                {% else %}
+                                    <span class="text-amber-500 italic font-medium">Non assigné</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </td>
+
+                    <td class="text-center p-4 border-b border-slate-50">
+                        {% if item.complet %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-600 font-black text-[10px] uppercase border border-emerald-100">
+                                <i data-lucide="check-circle-2" size="12"></i> Conforme
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-50 text-brandRed font-black text-[10px] uppercase border border-brandRed/10">
+                                <i data-lucide="alert-circle" size="12"></i> Incomplet
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="text-center p-4 border-b border-slate-50">
+                        <div class="flex flex-col items-center gap-1.5">
+                            <span class="text-xs font-black text-slate-700">
+                                {{ item.visites }} <span class="text-slate-300 font-bold">/ 2</span>
+                            </span>
+                            <div class="w-20 bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                <div class="{% if item.complet %}bg-emerald-500{% else %}bg-slate-400{% endif %} h-full transition-all" 
+                                     style="width: {% if item.visites == 1 %}50{% elif item.visites >= 2 %}100{% else %}0{% endif %}%"></div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="text-right p-4 pr-6 border-b border-slate-50">
+                        {% if not item.complet %}
+                            <span class="text-[10px] font-black text-brandRed uppercase">
+                                Manque {{ item.manquant }} passage{{ item.manquant|pluralize }}
+                            </span>
+                        {% else %}
+                            <span class="text-[10px] font-black text-emerald-500 uppercase">Terminé</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="p-4 bg-slate-50/50 border-t border-slate-100 flex justify-between items-center text-xs font-black uppercase text-slate-400">
+        <span>Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        <div class="flex gap-2">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&superviseur={{ sup_id }}" class="btn btn-sm bg-white border-slate-200 text-slate-600 px-4 rounded-lg">Précédent</a>
+            {% endif %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&superviseur={{ sup_id }}" class="btn btn-sm bg-white border-slate-200 text-slate-600 px-4 rounded-lg">Suivant</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

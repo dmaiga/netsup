@@ -1,0 +1,140 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Incidents Critiques</h1>
+        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Gestion des alertes et suivi des interventions</p>
+    </div>
+
+    <div class="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <a href="?statut=actifs" 
+           class="px-5 py-2 rounded-lg text-[10px] font-black uppercase transition-all flex items-center gap-2 
+           {% if statut != 'resolu' %}bg-white text-brandRed shadow-sm border border-slate-200/50{% else %}text-slate-400 hover:text-slate-600{% endif %}">
+            <span class="w-1.5 h-1.5 rounded-full bg-brandRed animate-pulse"></span>
+            En cours
+        </a>
+        <a href="?statut=resolu" 
+           class="px-5 py-2 rounded-lg text-[10px] font-black uppercase transition-all flex items-center gap-2
+           {% if statut == 'resolu' %}bg-white text-emerald-600 shadow-sm border border-slate-200/50{% else %}text-slate-400 hover:text-slate-600{% endif %}">
+            <i data-lucide="archive" size="12"></i>
+            Archives
+        </a>
+    </div>
+</div>
+
+<div class="space-y-4">
+    {% for inc in page_obj %}
+    <div class="bg-white border {% if inc.incident_resolu %}border-slate-100 opacity-80{% else %}border-red-100 shadow-sm shadow-red-50{% endif %} rounded-2xl overflow-hidden transition-all group">
+        <div class="flex flex-col lg:flex-row">
+            
+            <div class="w-1.5 {% if inc.incident_resolu %}bg-slate-200{% else %}bg-brandRed{% endif %}"></div>
+
+            <div class="flex-1 p-6 flex flex-col md:flex-row gap-8">
+                
+                <div class="md:w-1/4">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2.5 {% if inc.incident_resolu %}bg-slate-50 text-slate-400{% else %}bg-red-50 text-brandRed{% endif %} rounded-xl border border-current/10">
+                            <i data-lucide="map-pin" size="18"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-slate-800 uppercase text-xs tracking-tight">{{ inc.site.nom }}</h3>
+                            <p class="text-[10px] text-slate-400 font-medium">Contrôle #{{ inc.id }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3 pt-3 border-t border-slate-50">
+                        <div class="flex items-center gap-2">
+                            <div class="w-5 h-5 rounded bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-500 uppercase">
+                                {{ inc.superviseur.username|slice:":1" }}
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-600">{{ inc.superviseur.get_full_name|default:inc.superviseur.username }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-slate-400">
+                            <i data-lucide="calendar" size="12"></i>
+                            <span class="text-[10px] font-medium">{{ inc.date|date:"d M Y • H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:w-2/4 flex flex-col justify-center">
+                    <div class="relative">
+                        <i data-lucide="quote" size="24" class="absolute -top-3 -left-3 text-slate-100 -z-10"></i>
+                        <div class="p-5 bg-slate-50/50 border border-slate-100 rounded-2xl relative">
+                             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                <i data-lucide="message-square" size="10"></i> Rapport du superviseur
+                            </p>
+                            <p class="text-sm text-slate-700 leading-relaxed font-medium">
+                                {{ inc.problemes }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:w-1/4 flex flex-col justify-center items-end border-l border-slate-50 pl-6 gap-4">
+                    {% if not inc.incident_resolu %}
+                        <div class="flex flex-col items-end gap-1">
+                            <span class="px-3 py-1 bg-red-100 text-brandRed font-black text-[9px] rounded-full uppercase tracking-tighter">
+                                Action immédiate requise
+                            </span>
+                        </div>
+                        <div class="flex flex-col gap-2 w-full max-w-[180px]">
+                            <a href="{% url 'resoudre_incident' inc.id %}" class="btn btn-sm bg-slate-900 hover:bg-black text-white border-none rounded-lg text-[10px] font-bold gap-2">
+                                <i data-lucide="check-circle-2" size="14"></i>
+                                Clôturer l'incident
+                            </a>
+                            <a href="{% url 'admin_rapport_detail' inc.id %}" class="btn btn-sm btn-ghost border border-slate-200 text-slate-500 rounded-lg text-[10px] font-bold">
+                                Voir le rapport complet
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-right">
+                            <div class="flex items-center gap-2 text-emerald-600 mb-1">
+                                <i data-lucide="check-check" size="14"></i>
+                                <span class="font-black text-[10px] uppercase">Rétabli / Résolu</span>
+                            </div>
+                            <p class="text-[10px] text-slate-400 font-bold bg-slate-50 px-2 py-1 rounded">
+                                Le {{ inc.date_resolution|date:"d/m/Y" }} à {{ inc.date_resolution|date:"H:i" }}
+                            </p>
+                        </div>
+                        <a href="{% url 'admin_rapport_detail' inc.id %}" class="btn btn-xs btn-ghost text-slate-400 hover:text-brandBlue mt-2 underline decoration-slate-200">
+                            Consulter l'archive
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="bg-white rounded-3xl p-20 text-center border-2 border-dashed border-slate-100">
+        <div class="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i data-lucide="shield-check" size="40"></i>
+        </div>
+        <h3 class="text-slate-800 font-bold text-lg">Aucun incident actif</h3>
+        <p class="text-slate-400 text-sm max-w-xs mx-auto mt-2 italic">Tous les sites sont actuellement sous contrôle et aucun problème majeur n'a été signalé.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="mt-10 flex justify-center items-center gap-6">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&statut={{ statut }}" class="text-xs font-bold text-slate-400 hover:text-brandBlue flex items-center gap-1 transition-colors">
+            <i data-lucide="chevron-left" size="14"></i> Précédent
+        </a>
+    {% endif %}
+
+    <div class="flex gap-2">
+        <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-900 text-white text-[10px] font-black">
+            {{ page_obj.number }}
+        </span>
+    </div>
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&statut={{ statut }}" class="text-xs font-bold text-slate-400 hover:text-brandBlue flex items-center gap-1 transition-colors">
+            Suivant <i data-lucide="chevron-right" size="14"></i>
+        </a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
