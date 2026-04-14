@@ -2,6 +2,12 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as DjangoUserManager
 from django.db import models
+from tomlkit import datetime
+from datetime import datetime
+
+from django.db import transaction
+from datetime import datetime
+    
 
 from sites.models import Site
 
@@ -20,13 +26,46 @@ class Technicien(models.Model):
 
     def __str__(self):
         return f"{self.prenom} {self.nom}"
-       
+    
+
+    def generate_matricule(self):
+        year = datetime.now().year
+    
+        with transaction.atomic():
+            last = (
+                Technicien.objects
+                .select_for_update()
+                .filter(matricule__startswith=f"TECH-{year}")
+                .order_by('-id')
+                .first()
+            )
+    
+            if last and last.matricule:
+                try:
+                    last_number = int(last.matricule.split('-')[-1])
+                except ValueError:
+                    last_number = 0
+            else:
+                last_number = 0
+    
+            new_number = last_number + 1
+    
+            return f"TECH-{year}-{str(new_number).zfill(4)}"
+
     def get_sites_actifs(self):
         """Retourne tous les sites sur lesquels cet agent est actuellement affecté."""
         return Site.objects.filter(
             affectations__technicien=self,
             affectations__actif=True
         ).distinct()
+
+    def save(self, *args, **kwargs):
+        creating = self.pk is None
+    
+        if creating and not self.matricule:
+            self.matricule = self.generate_matricule()
+    
+        super().save(*args, **kwargs)
 
     
     

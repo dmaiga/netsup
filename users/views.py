@@ -33,6 +33,13 @@ from itertools import chain
 
 from controles.models import PointageAgent
 from django.db.models import Avg, FloatField, ExpressionWrapper, F
+from django.db.models import Count, Q
+from datetime import datetime, timedelta
+from django.utils import timezone
+from django.db.models import Q, Count
+from django.db.models import Q
+from django.utils import timezone
+from datetime import datetime
 
 
 def redirect_dashboard(user):
@@ -101,7 +108,6 @@ def dashboard_superviseur(request):
     return render(request, "users/dashboard/superviseur.html",context)
 
 
-from django.db.models import Count, Q
 
 @login_required
 def user_list(request):
@@ -328,9 +334,6 @@ def dashboard_direction(request):
     }
     return render(request, "users/dashboard/administration.html", context)
 
-from datetime import datetime, timedelta
-from django.utils import timezone
-from django.db.models import Q, Count
 
 @login_required
 def couverture_hebdo(request):
@@ -437,9 +440,7 @@ def liste_incidents_critiques(request):
     })
 
 
-from django.db.models import Q
-from django.utils import timezone
-from datetime import datetime
+
 
 @login_required
 def admin_rapport_list(request):
