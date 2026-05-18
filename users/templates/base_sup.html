@@ -138,59 +138,9 @@
 
         </main>
 
-        <!-- MOBILE NAV -->
+       
 
-        <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50">
-        
-            <div class="grid grid-cols-4 h-16">
-            
-                <!-- Dashboard -->
-                <a href="{% url 'dashboard_superviseur' %}"
-                   class="flex flex-col items-center justify-center gap-1 text-xs transition-all {% if request.resolver_match.url_name == 'dashboard_superviseur' %}mobile-active{% else %}text-slate-400{% endif %}">
-            
-                    <i data-lucide="layout-dashboard"
-                       class="w-5 h-5"></i>
-            
-                    <span>Dashboard</span>
-            
-                </a>
-            
-                <!-- Sites -->
-                <a href="{% url 'liste_site' %}"
-                   class="flex flex-col items-center justify-center gap-1 text-xs transition-all {% if request.resolver_match.url_name == 'liste_site' %}mobile-active{% else %}text-slate-400{% endif %}">
-            
-                    <i data-lucide="building-2"
-                       class="w-5 h-5"></i>
-            
-                    <span>Sites</span>
-            
-                </a>
-            
-                <!-- Agents -->
-                <a href="{% url 'technicien_list' %}"
-                   class="flex flex-col items-center justify-center gap-1 text-xs transition-all {% if request.resolver_match.url_name == 'technicien_list' %}mobile-active{% else %}text-slate-400{% endif %}">
-            
-                    <i data-lucide="user-cog"
-                       class="w-5 h-5"></i>
-            
-                    <span>Agents</span>
-            
-                </a>
-            
-                <!-- Historique -->
-                <a href="{% url 'controle_list' %}"
-                   class="flex flex-col items-center justify-center gap-1 text-xs transition-all {% if request.resolver_match.url_name == 'controle_list' %}mobile-active{% else %}text-slate-400{% endif %}">
-            
-                    <i data-lucide="history"
-                       class="w-5 h-5"></i>
-            
-                    <span>Historique</span>
-            
-                </a>
-            
-            </div>
-        
-        </nav>
+
 
     </div>
 
