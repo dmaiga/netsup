@@ -10,6 +10,7 @@ from sites.models import Site, AffectationAgent
 from django.utils import timezone
 
 from users.forms import TechnicienTerrainForm
+from users.models import Technicien
 
 
 @login_required
@@ -29,7 +30,7 @@ def create_technicien(request):
         technicien.save()
 
         return redirect(
-            'dashboard_superviseur'
+            'technicien_list'
         )
 
     context = {
@@ -42,3 +43,47 @@ def create_technicien(request):
         context
     )
 
+
+@login_required
+def technicien_list(request):
+
+    techniciens = (
+        Technicien.objects
+        .filter(
+            superviseur=request.user
+        )
+        .order_by('prenom', 'nom')
+    )
+
+    context = {
+        'techniciens': techniciens
+    }
+
+    return render(
+        request,
+        'users/superviseur/technicien_list.html',
+        context
+    )
+
+
+@login_required
+def technicien_detail(request, pk):
+
+    technicien = get_object_or_404(
+        Technicien,
+        pk=pk,
+        superviseur=request.user
+    )
+
+    sites = technicien.get_sites_actifs()
+
+    context = {
+        'technicien': technicien,
+        'sites': sites
+    }
+
+    return render(
+        request,
+        'users/superviseur/technicien_detail.html',
+        context
+    )

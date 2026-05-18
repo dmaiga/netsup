@@ -83,10 +83,14 @@ class TechnicienTerrainForm(forms.ModelForm):
 class AffectationTechnicienForm(forms.Form):
 
     technicien = forms.ModelChoiceField(
-        queryset=Technicien.objects.all()
+        queryset=Technicien.objects.none(),
+        widget=forms.Select(attrs={
+            'class': 'select select-bordered w-full'
+        })
     )
-    
+
     def __init__(self, *args, superviseur=None, **kwargs):
+
         super().__init__(*args, **kwargs)
 
         self.fields['technicien'].queryset = (
@@ -95,4 +99,3 @@ class AffectationTechnicienForm(forms.Form):
                 actif=True
             )
         )
-

@@ -1,0 +1,159 @@
+{% extends 'base_sup.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="min-h-screen bg-slate-50 pb-24">
+
+    <!-- Header -->
+    <div class="bg-white border-b border-slate-200 sticky top-0 z-30">
+
+        <div class="flex items-center justify-between px-4 py-4">
+
+            <div>
+
+                <h1 class="text-xl font-bold text-slate-800">
+                    Mes techniciens
+                </h1>
+
+                <p class="text-sm text-slate-500">
+                    Liste des agents terrain
+                </p>
+
+            </div>
+
+            <a href="{% url 'create_technicien' %}"
+               class="btn btn-primary btn-sm rounded-xl">
+
+                <i data-lucide="plus"
+                   class="w-4 h-4"></i>
+
+                Ajouter
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- Content -->
+    <div class="p-4 space-y-4">
+
+        {% if techniciens %}
+
+            {% for technicien in techniciens %}
+
+                <a href="{% url 'technicien_detail' technicien.pk %}"
+                   class="card bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all rounded-2xl">
+
+                    <div class="card-body p-4">
+
+                        <div class="flex items-center gap-4">
+
+                            <!-- Photo -->
+                            <div class="avatar">
+
+                                <div class="w-16 rounded-2xl bg-slate-100">
+
+                                    {% if technicien.photo %}
+
+                                        <img src="{{ technicien.photo.url }}"
+                                             alt="{{ technicien.nom }}">
+
+                                    {% else %}
+
+                                        <div class="w-full h-full flex items-center justify-center">
+
+                                            <i data-lucide="user"
+                                               class="w-7 h-7 text-slate-400"></i>
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                            <!-- Infos -->
+                            <div class="flex-1 min-w-0">
+
+                                <h2 class="font-semibold text-slate-800 truncate">
+                                    {{ technicien.prenom }} {{ technicien.nom }}
+                                </h2>
+
+                                <p class="text-sm text-slate-500">
+                                    {{ technicien.matricule }}
+                                </p>
+
+                                <div class="flex items-center gap-2 mt-2">
+
+                                    {% if technicien.actif %}
+
+                                        <span class="badge badge-success badge-sm">
+                                            Actif
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge badge-error badge-sm">
+                                            Inactif
+                                        </span>
+
+                                    {% endif %}
+
+                                    <span class="badge badge-outline badge-sm">
+                                        {{ technicien.get_sites_actifs.count }} site(s)
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                            <!-- Arrow -->
+                            <i data-lucide="chevron-right"
+                               class="w-5 h-5 text-slate-400"></i>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="card bg-white border border-dashed border-slate-300">
+
+                <div class="card-body items-center text-center py-10">
+
+                    <i data-lucide="users"
+                       class="w-12 h-12 text-slate-300"></i>
+
+                    <h3 class="font-semibold text-slate-700">
+                        Aucun technicien
+                    </h3>
+
+                    <p class="text-sm text-slate-500">
+                        Commencez par ajouter un agent terrain.
+                    </p>
+
+                    <a href="{% url 'create_technicien' %}"
+                       class="btn btn-primary btn-sm rounded-xl mt-4">
+
+                        Ajouter un technicien
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

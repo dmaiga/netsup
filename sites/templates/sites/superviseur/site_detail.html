@@ -4,165 +4,268 @@
 
 {% block content %}
 
-<div class="p-6 max-w-7xl mx-auto">
+<div class="min-h-screen bg-base-200/30">
 
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+    <div class="p-4 md:p-6 max-w-7xl mx-auto">
 
-        <div>
-            <h1 class="text-3xl font-bold">
-                {{ site.nom }}
-            </h1>
+        <!-- Header -->
+        <div class="flex flex-col gap-5 mb-8">
 
-            <p class="text-base-content/70 mt-2">
-                {{ site.client_nom }}
-            </p>
-        </div>
+            <!-- Retour -->
+            <div>
 
-        <div class="flex gap-3">
+                <a href="{% url 'superviseur_sites' %}"
+                   class="btn btn-ghost btn-sm rounded-xl">
 
-            <a href="{% url 'affecter_technicien' site.id %}"
-               class="btn btn-primary">
-                Affecter technicien
-            </a>
+                    <i data-lucide="arrow-left"
+                       class="w-4 h-4"></i>
 
-        </div>
+                    Retour aux sites
 
-    </div>
+                </a>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+            </div>
 
-        <div class="stats shadow">
+            <!-- Site Infos -->
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
 
-            <div class="stat">
-                <div class="stat-title">
-                    Techniciens actifs
+                <div>
+
+                    <div class="flex items-center gap-3">
+
+                        <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+
+                            <i data-lucide="building-2"
+                               class="w-7 h-7 text-primary"></i>
+
+                        </div>
+
+                        <div>
+
+                            <h1 class="text-2xl md:text-3xl font-bold">
+                                {{ site.nom }}
+                            </h1>
+
+                            <p class="text-base-content/70 mt-1">
+                                {{ site.client_nom }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
-                <div class="stat-value text-primary">
-                    {{ techniciens.count }}
+                <div>
+
+                    <a href="{% url 'affecter_technicien' site.id %}"
+                       class="btn btn-primary rounded-2xl w-full sm:w-auto">
+
+                        <i data-lucide="user-plus"
+                           class="w-4 h-4"></i>
+
+                        Affecter technicien
+
+                    </a>
+
                 </div>
+
             </div>
 
         </div>
 
-        <div class="stats shadow">
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
 
-            <div class="stat">
-                <div class="stat-title">
-                    Latitude
+            <!-- Techniciens -->
+            <div class="stats shadow bg-base-100 border border-base-200">
+
+                <div class="stat">
+
+                    <div class="stat-figure text-primary">
+
+                        <i data-lucide="users"
+                           class="w-7 h-7"></i>
+
+                    </div>
+
+                    <div class="stat-title">
+                        Techniciens actifs
+                    </div>
+
+                    <div class="stat-value text-primary">
+                        {{ techniciens.count }}
+                    </div>
+
                 </div>
 
-                <div class="stat-value text-lg">
-                    {{ site.latitude }}
+            </div>
+
+            <!-- Adresse -->
+            <div class="stats shadow bg-base-100 border border-base-200">
+
+                <div class="stat">
+
+                    <div class="stat-figure text-error">
+
+                        <i data-lucide="map-pin"
+                           class="w-7 h-7"></i>
+
+                    </div>
+
+                    <div class="stat-title">
+                        Adresse
+                    </div>
+
+                    <div class="stat-value text-lg leading-snug">
+                        {{ site.adresse }}
+                    </div>
+
                 </div>
+
             </div>
 
         </div>
 
-        <div class="stats shadow">
+        <!-- Techniciens -->
+        <div class="card bg-base-100 shadow-md border border-base-200 rounded-3xl">
 
-            <div class="stat">
-                <div class="stat-title">
-                    Longitude
+            <div class="card-body">
+
+                <div class="flex items-center justify-between mb-6">
+
+                    <h2 class="card-title text-xl">
+                        Techniciens affectés
+                    </h2>
+
+                    <div class="badge badge-primary badge-lg">
+                        {{ techniciens.count }}
+                    </div>
+
                 </div>
 
-                <div class="stat-value text-lg">
-                    {{ site.longitude }}
-                </div>
-            </div>
+                {% if techniciens %}
 
-        </div>
-
-    </div>
-
-    <div class="card bg-base-100 shadow-md border border-base-200">
-
-        <div class="card-body">
-
-            <div class="flex items-center justify-between mb-5">
-
-                <h2 class="card-title">
-                    Techniciens affectés
-                </h2>
-
-            </div>
-
-            <div class="overflow-x-auto">
-
-                <table class="table">
-
-                    <thead>
-                        <tr>
-                            <th>Photo</th>
-                            <th>Nom</th>
-                            <th>Téléphone</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
                         {% for technicien in techniciens %}
 
-                        <tr>
+                        <div class="card bg-base-100 border border-slate-200 shadow-sm hover:shadow-lg transition-all rounded-3xl">
 
-                            <td>
+                            <div class="card-body p-5">
 
-                                {% if technicien.photo %}
-                                    <img src="{{ technicien.photo.url }}"
-                                         class="w-14 h-14 rounded-lg object-cover">
-                                {% else %}
-                                    <div class="avatar placeholder">
-                                        <div class="bg-neutral text-neutral-content rounded-lg w-14">
-                                            <span>
-                                                {{ technicien.nom|first }}
-                                            </span>
-                                        </div>
+                                <!-- Top -->
+                                <div class="flex items-start gap-4">
+
+                                    <!-- Avatar -->
+                                    <div class="avatar">
+
+                                        {% if technicien.photo %}
+
+                                            <div class="w-16 rounded-2xl">
+
+                                                <img src="{{ technicien.photo.url }}"
+                                                     class="object-cover">
+
+                                            </div>
+
+                                        {% else %}
+
+                                            <div class="w-16 rounded-2xl bg-neutral text-neutral-content flex items-center justify-center">
+
+                                                <span class="text-xl font-bold">
+                                                    {{ technicien.nom|first }}
+                                                </span>
+
+                                            </div>
+
+                                        {% endif %}
+
                                     </div>
-                                {% endif %}
 
-                            </td>
+                                    <!-- Infos -->
+                                    <div class="flex-1 min-w-0">
 
-                            <td>
-                                {{ technicien.prenom }} {{ technicien.nom }}
-                            </td>
+                                        <h3 class="font-bold text-lg truncate">
+                                            {{ technicien.prenom }} {{ technicien.nom }}
+                                        </h3>
 
-                            <td>
-                                {{ technicien.telephone }}
-                            </td>
+                                        <p class="text-sm text-slate-500 mt-1">
+                                            {{ technicien.telephone }}
+                                        </p>
 
-                            <td>
+                                        <div class="badge badge-success badge-sm mt-3">
+                                            Actif
+                                        </div>
 
-                                {% for affectation in technicien.affectations.all %}
+                                    </div>
 
-                                    {% if affectation.site == site and affectation.actif %}
+                                </div>
 
-                                        <a href="{% url 'retirer_technicien' affectation.id %}"
-                                           class="btn btn-error btn-sm">
-                                            Retirer
-                                        </a>
+                                <!-- Actions -->
+                                <div class="mt-6">
 
-                                    {% endif %}
+                                    {% for affectation in technicien.affectations.all %}
 
-                                {% endfor %}
+                                        {% if affectation.site == site and affectation.actif %}
 
-                            </td>
+                                            <a href="{% url 'retirer_technicien' affectation.id %}"
+                                               class="btn btn-error btn-sm rounded-xl w-full">
 
-                        </tr>
+                                                <i data-lucide="user-minus"
+                                                   class="w-4 h-4"></i>
 
-                        {% empty %}
+                                                Retirer du site
 
-                        <tr>
-                            <td colspan="4" class="text-center py-10">
-                                Aucun technicien affecté.
-                            </td>
-                        </tr>
+                                            </a>
+
+                                        {% endif %}
+
+                                    {% endfor %}
+
+                                </div>
+
+                            </div>
+
+                        </div>
 
                         {% endfor %}
 
-                    </tbody>
+                    </div>
 
-                </table>
+                {% else %}
+
+                    <!-- Empty State -->
+                    <div class="text-center py-14">
+
+                        <div class="w-20 h-20 rounded-full bg-base-200 flex items-center justify-center mx-auto mb-5">
+
+                            <i data-lucide="users"
+                               class="w-10 h-10 text-slate-300"></i>
+
+                        </div>
+
+                        <h3 class="text-2xl font-bold">
+                            Aucun technicien affecté
+                        </h3>
+
+                        <p class="text-slate-500 mt-3 mb-7 max-w-md mx-auto">
+                            Commencez par affecter un technicien à ce site.
+                        </p>
+
+                        <a href="{% url 'affecter_technicien' site.id %}"
+                           class="btn btn-primary rounded-2xl">
+
+                            <i data-lucide="user-plus"
+                               class="w-4 h-4"></i>
+
+                            Affecter un technicien
+
+                        </a>
+
+                    </div>
+
+                {% endif %}
 
             </div>
 

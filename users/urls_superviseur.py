@@ -12,5 +12,15 @@ urlpatterns = [
         views_superviseur.create_technicien,
         name='create_technicien'
     ),
+    path(
+        'techniciens/',
+        views_superviseur.technicien_list,
+        name='technicien_list'
+    ),
 
+    path(
+        'techniciens/<int:pk>/',
+        views_superviseur.technicien_detail,
+        name='technicien_detail'
+    ),
 ]

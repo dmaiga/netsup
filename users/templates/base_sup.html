@@ -116,7 +116,7 @@
                         </li>
 
                         <li>
-                            <a href="#">
+                            <a href="{% url 'logout' %}">
                                 Déconnexion
                             </a>
                         </li>
@@ -141,63 +141,55 @@
         <!-- MOBILE NAV -->
 
         <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50">
-
-            <div class="grid grid-cols-5 h-16">
-
+        
+            <div class="grid grid-cols-4 h-16">
+            
+                <!-- Dashboard -->
                 <a href="{% url 'dashboard_superviseur' %}"
-                   class="flex flex-col items-center justify-center gap-1 text-xs {% if request.resolver_match.url_name == 'dashboard_superviseur' %}mobile-active{% else %}text-slate-400{% endif %}">
-
+                   class="flex flex-col items-center justify-center gap-1 text-xs transition-all {% if request.resolver_match.url_name == 'dashboard_superviseur' %}mobile-active{% else %}text-slate-400{% endif %}">
+            
                     <i data-lucide="layout-dashboard"
                        class="w-5 h-5"></i>
-
+            
                     <span>Dashboard</span>
-
+            
                 </a>
-
+            
+                <!-- Sites -->
                 <a href="{% url 'superviseur_sites' %}"
-                   class="flex flex-col items-center justify-center gap-1 text-xs {% if request.resolver_match.url_name == 'superviseur_sites' %}mobile-active{% else %}text-slate-400{% endif %}">
-
-                    <i data-lucide="map-pin"
+                   class="flex flex-col items-center justify-center gap-1 text-xs transition-all {% if request.resolver_match.url_name == 'superviseur_sites' %}mobile-active{% else %}text-slate-400{% endif %}">
+            
+                    <i data-lucide="building-2"
                        class="w-5 h-5"></i>
-
+            
                     <span>Sites</span>
-
+            
                 </a>
-
-                <a href="{% url 'scan' %}"
-                   class="flex items-center justify-center">
-
-                    <div class="bg-brandBlue text-white rounded-full p-4 shadow-xl -mt-10">
-
-                        <i data-lucide="qr-code"
-                           class="w-6 h-6"></i>
-
-                    </div>
-
-                </a>
-
-                <a href="{% url 'create_technicien' %}"
-                   class="flex flex-col items-center justify-center gap-1 text-xs {% if request.resolver_match.url_name == 'create_technicien' %}mobile-active{% else %}text-slate-400{% endif %}">
-
-                    <i data-lucide="users"
+            
+                <!-- Agents -->
+                <a href="{% url 'technicien_list' %}"
+                   class="flex flex-col items-center justify-center gap-1 text-xs transition-all {% if request.resolver_match.url_name == 'technicien_list' %}mobile-active{% else %}text-slate-400{% endif %}">
+            
+                    <i data-lucide="user-cog"
                        class="w-5 h-5"></i>
-
+            
                     <span>Agents</span>
-
+            
                 </a>
-
+            
+                <!-- Historique -->
                 <a href="{% url 'controle_list' %}"
-                   class="flex flex-col items-center justify-center gap-1 text-xs {% if request.resolver_match.url_name == 'controle_list' %}mobile-active{% else %}text-slate-400{% endif %}">
-
-                    <i data-lucide="clipboard-list"
+                   class="flex flex-col items-center justify-center gap-1 text-xs transition-all {% if request.resolver_match.url_name == 'controle_list' %}mobile-active{% else %}text-slate-400{% endif %}">
+            
+                    <i data-lucide="history"
                        class="w-5 h-5"></i>
-
+            
                     <span>Historique</span>
-
+            
                 </a>
-
+            
             </div>
-
+        
         </nav>
 
     </div>
@@ -264,6 +256,17 @@
 
                     <span>
                         Gestion Site
+                    </span>
+                
+                </a>
+                <a href="{% url 'technicien_list' %}"
+                   class="flex items-center gap-4 p-4 rounded-xl transition-all hover:bg-slate-50 {% if request.resolver_match.url_name == 'technicien_list' or request.resolver_match.url_name == 'create_technicien' or request.resolver_match.url_name == 'technicien_detail'  %}drawer-active{% endif %}">
+
+                    <i  data-lucide="user-cog"
+                       class="w-5 h-5"></i>
+
+                    <span>
+                        Gestion Technicien
                     </span>
                 
                 </a>

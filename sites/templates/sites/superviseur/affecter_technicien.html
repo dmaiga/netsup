@@ -4,52 +4,150 @@
 
 {% block content %}
 
-<div class="max-w-2xl mx-auto p-6">
+<div class="min-h-screen bg-base-200/40">
 
-    <div class="mb-6">
+    <div class="max-w-2xl mx-auto p-4 md:p-6">
 
-        <h1 class="text-3xl font-bold">
-            Affecter un technicien
-        </h1>
+        <!-- Header -->
+        <div class="mb-6">
 
-        <p class="text-base-content/70 mt-2">
-            Site : {{ site.nom }}
-        </p>
+            <div class="flex items-center gap-3 mb-3">
 
-    </div>
+                <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
 
-    <div class="card bg-base-100 shadow-md border border-base-200">
+                    <i data-lucide="user-plus"
+                       class="w-7 h-7 text-primary"></i>
 
-        <div class="card-body">
-
-            <form method="post">
-
-                {% csrf_token %}
+                </div>
 
                 <div>
 
-                    <label class="label">
-                        <span class="label-text">
-                            Technicien
+                    <h1 class="text-2xl md:text-3xl font-bold">
+                        Affecter un technicien
+                    </h1>
+
+                    <p class="text-base-content/70 mt-1">
+                        Sélectionnez un agent pour ce site
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Site Widget -->
+        <div class="stats shadow w-full bg-base-100 border border-base-200 mb-6">
+
+            <div class="stat">
+
+                <div class="stat-figure text-primary">
+
+                    <i data-lucide="building-2"
+                       class="w-8 h-8"></i>
+
+                </div>
+
+                <div class="stat-title">
+                    Site concerné
+                </div>
+
+                <div class="stat-value text-xl md:text-2xl">
+                    {{ site.nom }}
+                </div>
+
+                {% if site.localisation %}
+
+                    <div class="stat-desc">
+                        {{ site.localisation }}
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <!-- Form Card -->
+        <div class="card bg-base-100 shadow-lg border border-base-200 rounded-3xl">
+
+            <div class="card-body p-5 md:p-7">
+
+                <form method="post"
+                      class="space-y-6">
+
+                    {% csrf_token %}
+
+                    <!-- Technicien -->
+                    <div>
+
+                        <label class="label">
+
+                            <span class="label-text font-medium">
+                                Technicien
+                            </span>
+
+                        </label>
+
+                        <div class="relative">
+
+                            {{ form.technicien }}
+
+                        </div>
+
+                        {% if form.technicien.errors %}
+
+                            <label class="label">
+
+                                <span class="label-text-alt text-error">
+
+                                    {{ form.technicien.errors|join:", " }}
+
+                                </span>
+
+                            </label>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- Info Box -->
+                    <div class="alert bg-primary/5 border border-primary/10">
+
+                        <i data-lucide="info"
+                           class="w-5 h-5 text-primary"></i>
+
+                        <span class="text-sm">
+                            Seuls les techniciens actifs liés à votre compte superviseur sont affichés.
                         </span>
-                    </label>
 
-                    {{ form.technicien }}
+                    </div>
 
-                </div>
+                    <!-- Actions -->
+                    <div class="flex flex-col sm:flex-row gap-3 sm:justify-end pt-2">
 
-                <div class="mt-8 flex justify-end">
+                        <a href="javascript:history.back()"
+                           class="btn btn-ghost">
 
-                    <button type="submit"
-                            class="btn btn-primary">
+                            Annuler
 
-                        Affecter
+                        </a>
 
-                    </button>
+                        <button type="submit"
+                                class="btn btn-primary">
 
-                </div>
+                            <i data-lucide="check"
+                               class="w-4 h-4"></i>
 
-            </form>
+                            Affecter le technicien
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
 
         </div>
 
