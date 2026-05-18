@@ -1,6 +1,10 @@
 {% extends "base_sup.html" %}
 
 {% block content %}
+<div id="loading-overlay" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center text-white">
+    <span class="loading loading-spinner loading-lg text-primary"></span>
+    <p class="mt-4 font-black uppercase tracking-widest text-sm">Enregistrement...</p>
+</div>
 <div class="mb-4">
     <a href="{% url 'superviseur_sites' %}" class="btn btn-ghost btn-sm gap-2 px-0">
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
@@ -17,7 +21,7 @@
     </p>
 </header>
 
-<form method="POST" enctype="multipart/form-data" class="space-y-6">
+<form id="controle-form" method="POST" enctype="multipart/form-data" class="space-y-6">
     {% csrf_token %}
     <input type="hidden" name="gps_lat" id="gps_lat">
     <input type="hidden" name="gps_long" id="gps_long">
@@ -29,9 +33,9 @@
         <div class="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
             <h3 class="font-bold text-slate-700 flex items-center gap-2">
                 <i data-lucide="users" class="w-4 h-4 text-primary"></i>
-                Pointage des agents
+                Pointage 
             </h3>
-            <div class="flex gap-3 text-xs font-bold">
+            <div class="flex gap-3 text-xs ">
                 <span id="counter-presents" class="badge badge-success badge-outline">0 présents</span>
                 <span id="counter-absents" class="badge badge-error badge-outline">0 absents</span>
             </div>
@@ -163,7 +167,7 @@
         </div>
     </div>
 
-    <div class="pt-4 pb-12">
+<div class="pt-4 pb-12">
         <button type="submit" class="btn btn-primary btn-lg w-full rounded-2xl shadow-lg shadow-primary/20 gap-3">
             <i data-lucide="save" class="w-5 h-5"></i>
             Enregistrer le contrôle
@@ -231,5 +235,10 @@ document.querySelectorAll(".pointage-row input[type=checkbox]").forEach(cb => {
 });
 // Init
 updateCounters();
+
+document.getElementById('controle-form').addEventListener('submit', function() {
+    document.getElementById('loading-overlay').classList.remove('hidden');
+    this.querySelector('button[type="submit"]').classList.add('btn-disabled');
+});
 </script>
 {% endblock %}

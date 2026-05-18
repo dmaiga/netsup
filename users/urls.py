@@ -31,4 +31,5 @@ urlpatterns = [
     path('technicien/<int:pk>/', technicien_detail, name='technicien_detail'),
     path('personnel/toggle/<int:pk>/', user_toggle_active, name='user_toggle_active'),
     path('personnel/delete/<int:pk>/', user_soft_delete, name='user_soft_delete'),
+
 ]

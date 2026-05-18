@@ -34,6 +34,10 @@ from django.core.paginator import Paginator
 
 
 from django.db.models import Avg, FloatField, ExpressionWrapper, F
+from django.db.models import Count, Q
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Count
 
 
 @login_required
@@ -80,8 +84,6 @@ def admin_site_create(request):
     return render(request, 'sites/admin_create.html', {'form': form})
 
 
-from django.db.models import Count, Q
-
 @login_required
 def admin_site_list(request):
     # Récupération des filtres
@@ -120,9 +122,6 @@ def admin_site_list(request):
         'liste_superviseurs': liste_superviseurs,
     })
 
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Count
 
 @login_required
 def admin_site_detail(request, pk):

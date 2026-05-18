@@ -18,7 +18,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR("Superviseur Samake (74034488) introuvable. Lancez seed_users d'abord."))
             return
 
-        # Liste exhaustive des 32 sites de Samake
+        # Liste exhaustive des sites de Samake
         sites_data = [
             {"nom": "PALAIS PRESIDENTIELLE", "lieu": "KOULOUBA", "eff": 11, "code": "SK-001"},
             {"nom": "CONTENTIEUX", "lieu": "DARSALAM", "eff": 6, "code": "SK-002"},
@@ -52,6 +52,22 @@ class Command(BaseCommand):
             {"nom": "GECI Expert Conseil", "lieu": "ACI 2000", "eff": 3, "code": "SK-030"},
             {"nom": "Immof", "lieu": "ACI 2000", "eff": 6, "code": "SK-031"},
             {"nom": "CIFA Bourse", "lieu": "ACI 2000", "eff": 2, "code": "SK-032"},
+            {"nom": "DGCE", "eff": 5, "lieu":"-"},
+            {"nom": "CESAG", "eff": 3, "lieu":"-"},
+            {"nom": "BENKAN", "eff": 1, "lieu":"-"},
+            {"nom": "HAUT CONSEIL", "eff": 8, "lieu":"-"},
+            {"nom": "IMMOAF", "eff": 3, "lieu":"-"},
+            {"nom": "IMMOAS", "eff": 1, "lieu":"-"},
+            {"nom": "IMMDAF", "eff": 1, "lieu":"-"},
+            {"nom": "SIRA MALI", "eff": 2, "lieu":"-"},
+            {"nom": "NET SUP", "eff": 1, "lieu":"-"},
+            {"nom": "BATCHILY ACI", "eff": 5, "lieu":"-"},
+            {"nom": "IMMEUBLE BATCHILY", "eff": 3, "lieu":"-"},
+            {"nom": "TELIUM", "eff": 7, "lieu":"-"},
+            {"nom": "TELIUM CIRA", "eff": 2, "lieu":"-"},
+            {"nom": "TELIUM MAIRIE CIV", "eff": 1, "lieu":"-"},
+            {"nom": "SITE AEROPORT", "eff": 1, "lieu":"-"},
+            {"nom": "APPARTEMENT YARA GOLF", "eff": 1, "lieu":"-"},
         ]
 
         count = 0

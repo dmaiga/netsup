@@ -345,14 +345,16 @@ def couverture_hebdo(request):
     # 2. Récupération des filtres
     query = request.GET.get('q', '')
     sup_id = request.GET.get('superviseur')
-    
+
     # 3. Filtrage des sites
     sites_list = Site.objects.filter(actif=True).order_by('nom')
+
     if query:
         sites_list = sites_list.filter(Q(nom__icontains=query) | Q(client_nom__icontains=query))
-    if sup_id:
-        sites_list = sites_list.filter(superviseur_id=sup_id)
 
+    
+    if sup_id and sup_id != "None" and sup_id.strip() != "":
+        sites_list = sites_list.filter(superviseur_id=sup_id)
     # 4. Calcul de la performance (KPI)
     controles_semaine = ControleSite.objects.filter(
         date__date__gte=debut_semaine,
@@ -399,6 +401,7 @@ def couverture_hebdo(request):
             'percent': round(performance_globale, 1),
             'nb_sites': sites_list.count()
         },
+        'sup_id': sup_id if sup_id and sup_id != "None" else "",
         'semaine_precedente': (debut_semaine - timedelta(days=7)).strftime('%Y-%m-%d'),
         'semaine_suivante': (debut_semaine + timedelta(days=7)).strftime('%Y-%m-%d'),
     }

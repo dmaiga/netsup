@@ -1,0 +1,159 @@
+<!-- templates/sites/superviseur/liste_site.html -->
+
+{% extends "base_sup.html" %}
+
+{% block content %}
+
+<div class="space-y-8">
+
+    <div class="flex items-center justify-between">
+
+        <div>
+
+            <h1 class="text-3xl font-bold">
+                Mes sites
+            </h1>
+
+            <p class="text-slate-500 mt-1">
+                Gérez vos sites et vos équipes terrain.
+            </p>
+
+        </div>
+
+        <a href="{% url 'create_site' %}"
+           class="btn btn-primary">
+
+            <i data-lucide="plus"></i>
+
+            Nouveau site
+
+        </a>
+
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+        {% for site in sites %}
+
+        <div class="card bg-base-100 border border-slate-200 shadow-sm hover:shadow-lg transition-all">
+
+            <div class="card-body">
+
+                <div class="flex items-start justify-between">
+
+                    <div>
+
+                        <h2 class="card-title text-lg">
+                            {{ site.nom }}
+                        </h2>
+
+                        <p class="text-sm text-slate-500">
+                            {{ site.client_nom }}
+                        </p>
+
+                    </div>
+
+                    <div class="badge badge-success gap-1">
+
+                        Actif
+
+                    </div>
+
+                </div>
+
+                <div class="mt-4 space-y-2 text-sm">
+
+                    <div class="flex items-center gap-2 text-slate-600">
+
+                        <i data-lucide="users"
+                           class="w-4 h-4"></i>
+
+                        <span>
+                            {{ site.get_agents_actifs.count }}
+                            technicien(s)
+                        </span>
+
+                    </div>
+
+                    <div class="flex items-center gap-2 text-slate-600">
+
+                        <i data-lucide="map-pin"
+                           class="w-4 h-4"></i>
+
+                        <span>
+                            {{ site.adresse|truncatechars:40 }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="card-actions justify-end mt-6">
+
+                    <a href="{% url 'site_detail' site.id %}"
+                       class="btn btn-sm btn-outline">
+
+                        Détails
+
+                    </a>
+
+                    <a href="{% url 'affecter_technicien' site.id %}"
+                       class="btn btn-sm btn-primary">
+
+                        Ajouter agent
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <div class="col-span-full">
+
+            <div class="hero bg-base-100 border border-dashed border-slate-300 rounded-2xl py-16">
+
+                <div class="hero-content text-center">
+
+                    <div>
+
+                        <i data-lucide="map"
+                           class="w-14 h-14 mx-auto text-slate-300 mb-4"></i>
+
+                        <h2 class="text-2xl font-bold">
+                            Aucun site enregistré
+                        </h2>
+
+                        <p class="text-slate-500 mt-2 mb-6">
+                            Commencez par créer votre premier site terrain.
+                        </p>
+
+                        <a href="{% url 'create_site' %}"
+                           class="btn btn-primary">
+
+                            Créer un site
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<script>
+    lucide.createIcons();
+</script>
+
+{% endblock %}

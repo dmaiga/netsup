@@ -27,6 +27,16 @@ urlpatterns = [
     path("user/",include("users.urls")),
     path("site/",include("sites.urls")) ,
     path("controles/",include("controles.urls")) ,
+    
+    path(
+        'sites/superviseur/',
+        include('sites.urls_superviseur')
+    ),
+
+    path(
+        'users/superviseur/',
+        include('users.urls_superviseur')
+    ),
 
       
 

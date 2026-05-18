@@ -11,6 +11,48 @@ from datetime import datetime
 
 from sites.models import Site
 
+class UserManager(DjangoUserManager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
+class User(AbstractUser):
+
+    ROLE_CHOICES = (
+        ('superviseur', 'Superviseur'),
+        ('admin', 'Administration'),
+        ('direction', 'Direction'),
+    )
+    technicien = models.OneToOneField(
+        'users.Technicien',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+
+    telephone = models.CharField(max_length=20, unique=True)
+
+    photo = models.ImageField(upload_to='users/', blank=True, null=True)
+
+    objects = UserManager()
+
+    is_active = models.BooleanField(default=True)
+
+    is_deleted = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.username} - {self.role}"
+    
+    @property
+    def full_name(self):
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        return self.username
+
 
 class Technicien(models.Model):
     matricule = models.CharField(max_length=50, unique=True)
@@ -23,7 +65,14 @@ class Technicien(models.Model):
     telephone = models.CharField(max_length=20, unique=True)
     photo = models.ImageField(upload_to='techniciens/', blank=True, null=True)
     actif = models.BooleanField(default=True)
-
+    
+    superviseur = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='techniciens'
+    )
     def __str__(self):
         return f"{self.prenom} {self.nom}"
     
@@ -69,47 +118,6 @@ class Technicien(models.Model):
 
     
     
-class UserManager(DjangoUserManager):
-
-    def get_queryset(self):
-        return super().get_queryset().filter(is_deleted=False)
-
-
-class User(AbstractUser):
-
-    ROLE_CHOICES = (
-        ('superviseur', 'Superviseur'),
-        ('admin', 'Administration'),
-        ('direction', 'Direction'),
-    )
-    technicien = models.OneToOneField(
-        Technicien,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-
-    telephone = models.CharField(max_length=20, unique=True)
-
-    photo = models.ImageField(upload_to='users/', blank=True, null=True)
-
-    objects = UserManager()
-
-    is_active = models.BooleanField(default=True)
-
-    is_deleted = models.BooleanField(default=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.username} - {self.role}"
-    
-    @property
-    def full_name(self):
-        if self.first_name and self.last_name:
-            return f"{self.first_name} {self.last_name}"
-        return self.username
 
 
 class Conge(models.Model):

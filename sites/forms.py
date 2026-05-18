@@ -6,7 +6,6 @@ class SiteForm(forms.ModelForm):
         model = Site
         fields = [
             'nom',
-            'code_site',
             'adresse',
             'client_nom',
             'nombre_techniciens_prevus',
@@ -18,7 +17,6 @@ class SiteForm(forms.ModelForm):
 
         widgets = {
             'nom': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
-            'code_site': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
             'client_nom': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
 
             'adresse': forms.Textarea(attrs={
@@ -48,3 +46,44 @@ class SiteForm(forms.ModelForm):
                 'class': 'toggle toggle-primary'
             }),
         }
+
+
+class SuperviseurSiteForm(forms.ModelForm):
+
+    class Meta:
+        model = Site
+        fields = [
+            'nom',
+            'adresse',
+            'client_nom',
+            'nombre_techniciens_prevus',
+            'latitude',
+            'longitude',
+            
+        ]
+
+        widgets = {
+            'nom': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
+            'client_nom': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
+
+            'adresse': forms.Textarea(attrs={
+                'class': 'textarea textarea-bordered w-full',
+                'rows': 2
+            }),
+
+            'nombre_techniciens_prevus': forms.NumberInput(attrs={
+                'class': 'input input-bordered w-full'
+            }),
+
+            'latitude': forms.NumberInput(attrs={
+                'class': 'input input-bordered w-full',
+                'step': 'any'
+            }),
+
+            'longitude': forms.NumberInput(attrs={
+                'class': 'input input-bordered w-full',
+                'step': 'any'
+            }),
+
+        }
+

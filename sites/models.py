@@ -13,8 +13,8 @@ class Site(models.Model):
     nom = models.CharField(max_length=200)
     code_site = models.CharField(max_length=50, unique=True)
 
-    adresse = models.CharField(max_length=255)
-    client_nom = models.CharField(max_length=200)
+    adresse = models.CharField(max_length=255,blank=True, null=True)
+    client_nom = models.CharField(max_length=200, blank=True, null=True)
 
     nombre_techniciens_prevus = models.IntegerField()
 

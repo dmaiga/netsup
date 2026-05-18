@@ -1,0 +1,175 @@
+<!-- templates/sites/superviseur/site_detail.html -->
+
+{% extends "base_sup.html" %}
+
+{% block content %}
+
+<div class="p-6 max-w-7xl mx-auto">
+
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+
+        <div>
+            <h1 class="text-3xl font-bold">
+                {{ site.nom }}
+            </h1>
+
+            <p class="text-base-content/70 mt-2">
+                {{ site.client_nom }}
+            </p>
+        </div>
+
+        <div class="flex gap-3">
+
+            <a href="{% url 'affecter_technicien' site.id %}"
+               class="btn btn-primary">
+                Affecter technicien
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+
+        <div class="stats shadow">
+
+            <div class="stat">
+                <div class="stat-title">
+                    Techniciens actifs
+                </div>
+
+                <div class="stat-value text-primary">
+                    {{ techniciens.count }}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="stats shadow">
+
+            <div class="stat">
+                <div class="stat-title">
+                    Latitude
+                </div>
+
+                <div class="stat-value text-lg">
+                    {{ site.latitude }}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="stats shadow">
+
+            <div class="stat">
+                <div class="stat-title">
+                    Longitude
+                </div>
+
+                <div class="stat-value text-lg">
+                    {{ site.longitude }}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card bg-base-100 shadow-md border border-base-200">
+
+        <div class="card-body">
+
+            <div class="flex items-center justify-between mb-5">
+
+                <h2 class="card-title">
+                    Techniciens affectés
+                </h2>
+
+            </div>
+
+            <div class="overflow-x-auto">
+
+                <table class="table">
+
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Nom</th>
+                            <th>Téléphone</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for technicien in techniciens %}
+
+                        <tr>
+
+                            <td>
+
+                                {% if technicien.photo %}
+                                    <img src="{{ technicien.photo.url }}"
+                                         class="w-14 h-14 rounded-lg object-cover">
+                                {% else %}
+                                    <div class="avatar placeholder">
+                                        <div class="bg-neutral text-neutral-content rounded-lg w-14">
+                                            <span>
+                                                {{ technicien.nom|first }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                {{ technicien.prenom }} {{ technicien.nom }}
+                            </td>
+
+                            <td>
+                                {{ technicien.telephone }}
+                            </td>
+
+                            <td>
+
+                                {% for affectation in technicien.affectations.all %}
+
+                                    {% if affectation.site == site and affectation.actif %}
+
+                                        <a href="{% url 'retirer_technicien' affectation.id %}"
+                                           class="btn btn-error btn-sm">
+                                            Retirer
+                                        </a>
+
+                                    {% endif %}
+
+                                {% endfor %}
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="4" class="text-center py-10">
+                                Aucun technicien affecté.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

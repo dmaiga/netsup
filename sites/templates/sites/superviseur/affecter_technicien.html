@@ -1,0 +1,60 @@
+<!-- templates/sites/superviseur/affecter_technicien.html -->
+
+{% extends "base_sup.html" %}
+
+{% block content %}
+
+<div class="max-w-2xl mx-auto p-6">
+
+    <div class="mb-6">
+
+        <h1 class="text-3xl font-bold">
+            Affecter un technicien
+        </h1>
+
+        <p class="text-base-content/70 mt-2">
+            Site : {{ site.nom }}
+        </p>
+
+    </div>
+
+    <div class="card bg-base-100 shadow-md border border-base-200">
+
+        <div class="card-body">
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div>
+
+                    <label class="label">
+                        <span class="label-text">
+                            Technicien
+                        </span>
+                    </label>
+
+                    {{ form.technicien }}
+
+                </div>
+
+                <div class="mt-8 flex justify-end">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        Affecter
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

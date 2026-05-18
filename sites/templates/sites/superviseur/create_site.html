@@ -1,0 +1,107 @@
+<!-- templates/sites/superviseur/create_site.html -->
+
+{% extends "base_sup.html" %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto p-6">
+
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold">
+            Créer un site
+        </h1>
+
+        <p class="text-base-content/70 mt-2">
+            Ajouter un nouveau site terrain.
+        </p>
+    </div>
+
+    <div class="card bg-base-100 shadow-md border border-base-200">
+
+        <div class="card-body">
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                    <div>
+                        <label class="label">
+                            <span class="label-text">
+                                Nom du site
+                            </span>
+                        </label>
+
+                        {{ form.nom }}
+                    </div>
+
+                    <div>
+                        <label class="label">
+                            <span class="label-text">
+                                Client
+                            </span>
+                        </label>
+
+                        {{ form.client_nom }}
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="label">
+                            <span class="label-text">
+                                Adresse
+                            </span>
+                        </label>
+
+                        {{ form.adresse }}
+                    </div>
+
+                    <div>
+                        <label class="label">
+                            <span class="label-text">
+                                Nombre de techniciens prévus
+                            </span>
+                        </label>
+
+                        {{ form.nombre_techniciens_prevus }}
+                    </div>
+
+                    <div>
+                        <label class="label">
+                            <span class="label-text">
+                                Latitude
+                            </span>
+                        </label>
+
+                        {{ form.latitude }}
+                    </div>
+
+                    <div>
+                        <label class="label">
+                            <span class="label-text">
+                                Longitude
+                            </span>
+                        </label>
+
+                        {{ form.longitude }}
+                    </div>
+
+                </div>
+
+                <div class="mt-8 flex justify-end">
+
+                    <button type="submit" class="btn btn-primary">
+                        Créer le site
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
