@@ -29,12 +29,12 @@ urlpatterns = [
     path("controles/",include("controles.urls")) ,
     
     path(
-        'sites/superviseur/',
+        'superviseur/',
         include('sites.urls_superviseur')
     ),
 
     path(
-        'users/superviseur/',
+        'superviseur/',
         include('users.urls_superviseur')
     ),
 

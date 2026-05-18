@@ -28,7 +28,7 @@ urlpatterns = [
     path('technicien/creer/', technicien_create, name='technicien_create_global'),
     path('technicien/<int:pk>/modifier/', technicien_update, name='technicien_update'),
     path('technicien/<int:pk>/supprimer/', technicien_soft_delete, name='technicien_soft_delete'),
-    path('technicien/<int:pk>/', technicien_detail, name='technicien_detail'),
+    path('technicien/<int:pk>/', technicien_detail, name='admin_technicien_detail'),
     path('personnel/toggle/<int:pk>/', user_toggle_active, name='user_toggle_active'),
     path('personnel/delete/<int:pk>/', user_soft_delete, name='user_soft_delete'),
 
